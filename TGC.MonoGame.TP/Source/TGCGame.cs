@@ -245,8 +245,8 @@ namespace TGC.MonoGame.TP
                         for (int z = (int)zone.Z; z < zone.W; z++)
                         {
                             var block = Map[x, z];
-                            block.Turrets.ForEach(turret => turret.Update(Xwing, elapsedTime));
-                            block.Turrets.RemoveAll(turret => turret.needsRemoval);
+                            
+                            block.Update(elapsedTime);
 
                             if(BoundingFrustum.Intersects(block.BB))
                                 Drawer.trenchesToDraw.Add(Map[x, z]);
@@ -328,23 +328,7 @@ namespace TGC.MonoGame.TP
             HUD.Draw();
 
         }
-        
-        
 
-
-
-        public static Model GetModelFromType(TrenchType type)
-        {
-            switch(type)
-            {
-                case TrenchType.Platform:        return Drawer.TrenchPlatform;
-                case TrenchType.Straight:        return Drawer.TrenchStraight;
-                case TrenchType.T:               return Drawer.TrenchT;
-                case TrenchType.Intersection:    return Drawer.TrenchIntersection;
-                case TrenchType.Elbow:           return Drawer.TrenchElbow;
-                default:                         return Drawer.TrenchPlatform;
-            }
-        }
         public enum GmState
         {
             StartScreen,

@@ -8,7 +8,9 @@ namespace TGC.MonoGame.TP
 	public class Trench
 	{
         public static float TrenchScale = 0.07f;
-        public Model Model { get; set; }
+		Model[] Models;
+		public Model SelectedModel;
+
 		public float Rotation { get; set; }
 		public Matrix SRT { get; set; }
 		public Vector3 Position { get; set; }
@@ -19,13 +21,10 @@ namespace TGC.MonoGame.TP
         public List<OrientedBoundingBox> orientedBoundingBoxes = new List<OrientedBoundingBox>();
         public BoundingBox BB;
 		public bool IsCurrent = false;
-		public Trench(TrenchType t, Model m)
-        {
-			Type = t;
-			Model = m;
-        }
+		
 		public Trench(TrenchType t, float r)
 		{
+			Game = TGCGame.Instance;
 			Type = t;
 			Rotation = r;
 		}
@@ -54,6 +53,31 @@ namespace TGC.MonoGame.TP
 
 			return hit;
         }
+		TGCGame Game;
+		public void Update(float elapsedTime)
+        {
+			var xwing = Game.Xwing;
+			Turrets.ForEach(turret => turret.Update(xwing, elapsedTime));
+			Turrets.RemoveAll(turret => turret.needsRemoval);
+
+
+			if (Type == TrenchType.Platform || Type == TrenchType.Straight)
+			{
+				var distance = Vector3.Distance(xwing.Position, Position);
+				if (distance < 400)
+					SelectedModel = Models[0];
+				else if (distance < 600)
+					SelectedModel = Models[1];
+				else if (distance < 900)
+					SelectedModel = Models[2];
+				else
+					SelectedModel = Models[3];
+			}
+			else
+				SelectedModel = Models[0];
+
+		}
+		/*Static elements*/
 		private static Trench GetNextTrench(Trench input, float rotation)
 		{
 			//Si es bloque de estos y no esta alineado, entonces es un straight
@@ -385,7 +409,7 @@ namespace TGC.MonoGame.TP
 					Trench block = Game.Map[x, z];
 
 
-					block.Model = TGCGame.GetModelFromType(Game.Map[x, z].Type);
+					block.Models = Drawer.GetModelsFromType(Game.Map[x, z].Type);
 
 					block.Position = new Vector3(tx, 0, tz);
 

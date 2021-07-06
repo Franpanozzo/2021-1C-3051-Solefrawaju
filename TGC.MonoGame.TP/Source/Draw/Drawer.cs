@@ -22,11 +22,11 @@ namespace TGC.MonoGame.TP
         public Model XwingModel;
         private Model XwingEnginesModel;
 
-        public static Model TrenchPlatform;
-        public static Model TrenchStraight;
-        public static Model TrenchT;
-        public static Model TrenchIntersection;
-        public static Model TrenchElbow;
+        public static Model[] TrenchPlatform;
+        public static Model[] TrenchStraight;
+        public static Model[] TrenchT;
+        public static Model[] TrenchIntersection;
+        public static Model[] TrenchElbow;
         public static Model TrenchTurret;
         SkyBox SkyBox;
         Model skyboxModel;
@@ -88,18 +88,40 @@ namespace TGC.MonoGame.TP
             SpriteBatch = new SpriteBatch(GraphicsDevice);
             LoadContent();
         }
+        Model[] loadNumberedModels(String source, int start, int end, int inc)
+        {
+            List<Model> models = new List<Model>();
+            for (int n = start; n <= end; n += inc)
+                models.Add(Content.Load<Model>(ContentFolder3D + source + n));
+
+            return models.ToArray();
+        }
         void LoadContent()
         {
             TieModel = Content.Load<Model>(ContentFolder3D + "TIE/TIE");
             XwingModel = Content.Load<Model>(ContentFolder3D + "XWing/model");
             XwingEnginesModel = Content.Load<Model>(ContentFolder3D + "XWing/xwing-engines");
 
-            TrenchPlatform = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Platform-Block");
-            TrenchStraight = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Straight-Block");
-            TrenchT = Content.Load<Model>(ContentFolder3D + "Trench/Trench-T-Block");
-            TrenchElbow = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Elbow-Block");
-            TrenchIntersection = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Intersection");
+
+            TrenchPlatform = loadNumberedModels("Trench/Platform/", 0, 3, 1);
+            TrenchStraight = loadNumberedModels("Trench/Straight/", 0, 3, 1);
+            //TrenchT = loadNumberedModels("Trench/T/", 0, 3, 1);
+            //TrenchElbow = loadNumberedModels("Trench/Elbow/", 0, 3, 1);
+            //TrenchIntersection = loadNumberedModels("Trench/Intersection/", 0, 3, 1);
+
+            //TrenchPlatform = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/Trench-Platform-Block") };
+            //TrenchStraight = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/Trench-Straight-Block") };
+            TrenchT = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/T/0") };
+            TrenchElbow = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/Elbow/0") };
+            TrenchIntersection = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/Intersection/0") };
+
+            //TrenchPlatform = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Platform-Block");
+            //TrenchStraight = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Straight-Block");
+            //TrenchT = Content.Load<Model>(ContentFolder3D + "Trench/Trench-T-Block");
+            //TrenchElbow = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Elbow-Block");
+            //TrenchIntersection = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Intersection");
             TrenchTurret = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Turret");
+
             //Trench2 = Content.Load<Model>(ContentFolder3D + "Trench2/Trench");
             LaserModel = Content.Load<Model>(ContentFolder3D + "Laser/Laser");
 
@@ -122,8 +144,13 @@ namespace TGC.MonoGame.TP
             
             SkyBox = new SkyBox(skyboxModel, skyBoxTexture, MasterMRT);
 
-            assignEffectToModels(new Model[] { TieModel, XwingModel, XwingEnginesModel, TrenchElbow,
-                TrenchIntersection, TrenchPlatform, TrenchStraight, TrenchT, TrenchTurret, LaserModel, SkyBox.Model }, MasterMRT);
+            assignEffectToModels(new Model[] { TieModel, XwingModel, XwingEnginesModel, TrenchTurret, LaserModel, SkyBox.Model }, MasterMRT);
+            
+            assignEffectToModels(TrenchElbow, MasterMRT);
+            assignEffectToModels(TrenchIntersection, MasterMRT);
+            assignEffectToModels(TrenchPlatform, MasterMRT);
+            assignEffectToModels(TrenchStraight, MasterMRT);
+            assignEffectToModels(TrenchT, MasterMRT);
 
             manageEffectParameters();
             
@@ -354,7 +381,7 @@ namespace TGC.MonoGame.TP
             
             Matrix world;
             
-            foreach (var mesh in t.Model.Meshes)
+            foreach (var mesh in t.SelectedModel.Meshes)
             {
                 world = mesh.ParentBone.Transform * t.SRT;
                 EPMRTcolor.SetValue(new Vector3(0.5f, 0.5f, 0.5f));
@@ -555,5 +582,17 @@ namespace TGC.MonoGame.TP
 
         }
         #endregion
+        public static Model[] GetModelsFromType(TrenchType type)
+        {
+            switch (type)
+            {
+                case TrenchType.Platform: return TrenchPlatform;
+                case TrenchType.Straight: return TrenchStraight;
+                case TrenchType.T: return TrenchT;
+                case TrenchType.Intersection: return TrenchIntersection;
+                case TrenchType.Elbow: return TrenchElbow;
+                default: return TrenchPlatform;
+            }
+        }
     }
 }
