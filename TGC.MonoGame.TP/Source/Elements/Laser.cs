@@ -13,6 +13,10 @@ namespace TGC.MonoGame.TP
 		public static float MapLimit;
 		public static float BlockSize;
 
+		public static Vector3[] OmniLightsPos;
+		public static Vector3[] OmniLightsColor;
+		public static int OmniLightsCount;
+
 		public Vector2 CurrentBlock;
 		public Matrix SRT { get; set; }
 		public Vector3 Position { get; set; }
@@ -45,11 +49,12 @@ namespace TGC.MonoGame.TP
 		}
 		public void Update(float time, Vector4 zone)
 		{
-			var translation = FrontDirection * 1500f * time;
-			Age += 1f * time;
-			//var translation = FrontDirection * 150f * time;
+            var translation = FrontDirection * 1500f * time;
 
-			Position += translation;
+            Age += 1f * time;
+            //var translation = FrontDirection * 150f * time;
+
+            Position += translation;
 
 
 			//BoundingCylinder.Move(translation);
@@ -102,17 +107,30 @@ namespace TGC.MonoGame.TP
 
 			//Debug.WriteLine("AL " + AlliedLasers.Count + " EL " + EnemyLasers.Count);
 		}
+		static List<Vector3> lasersPos = new List<Vector3>();
+		static List<Vector3> lasersColors = new List<Vector3>();
+
 		static void verifyAndAddLaser(Laser laser, ref BoundingFrustum frustum, ref List<Laser> drawList)
         {
-			if( laser.BoundingBox.Intersects(frustum)) 
+			if (laser.BoundingBox.Intersects(frustum))
+			{
 				drawList.Add(laser);
+				lasersPos.Add(laser.Position);
+				lasersColors.Add(laser.Color);
+			}
 		}
 		public static void AddAllRequiredtoDraw(ref List<Laser> drawList, ref BoundingFrustum frustum)
         {
+			lasersColors.Clear();
+			lasersPos.Clear();
 			foreach (var l in EnemyLasers)
 				verifyAndAddLaser(l, ref frustum, ref drawList);
 			foreach (var l in AlliedLasers)
 				verifyAndAddLaser(l, ref frustum, ref drawList);
+
+			OmniLightsPos = lasersPos.ToArray();
+			OmniLightsColor = lasersColors.ToArray();
+			OmniLightsCount = lasersPos.Count;
 		}
 	}
 }

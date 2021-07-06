@@ -44,6 +44,7 @@ namespace TGC.MonoGame.TP
                     }
                     Game.Graphics.ApplyChanges();
                     Game.HUD.Init();
+                    Game.Drawer.InitRTs();
                 }
             }
             if (kState.IsKeyDown(Keys.V))
@@ -68,14 +69,36 @@ namespace TGC.MonoGame.TP
                 {
                     ignoredKeys.Add(Keys.P);
                     //Game.ApplyBloom = !Game.ApplyBloom;
-                    Game.ApplyShadowMap = !Game.ApplyShadowMap;
+                    //Game.ApplyShadowMap = !Game.ApplyShadowMap;
 
-                    Game.Drawer.saveToFile = true;
+                    //Game.Drawer.saveToFile = true;
                 }
             }
             //Game.ShowShadowMap = kState.IsKeyDown(Keys.O);
-            
 
+            //if (kState.IsKeyDown(Keys.D1))
+            //    Game.Drawer.ShowTarget = 1;
+            else if (kState.IsKeyDown(Keys.D2))
+                Game.Drawer.ShowTarget = 2;
+            else if (kState.IsKeyDown(Keys.D3))
+                Game.Drawer.ShowTarget = 3;
+            else if (kState.IsKeyDown(Keys.D4))
+                Game.Drawer.ShowTarget = 4;
+            else if (kState.IsKeyDown(Keys.D5))
+                Game.Drawer.ShowTarget = 5;
+            else if (kState.IsKeyDown(Keys.D6))
+                Game.Drawer.ShowTarget = 6;
+            else if (kState.IsKeyDown(Keys.D7))
+                Game.Drawer.ShowTarget = 7;
+            else
+                Game.Drawer.ShowTarget = 0;
+
+            //if (kState.IsKeyDown(Keys.D0))
+            //    Game.Drawer.SpecularPower = 0.008f;
+            //else
+            //    Game.Drawer.SpecularPower = 0.8f;
+
+            //Game.Drawer.ShowTarget = 1;
             switch (Game.GameState)
             {
                 case TGCGame.GmState.StartScreen:
@@ -178,9 +201,9 @@ namespace TGC.MonoGame.TP
                     var deltaZ = 0f;
                     var update = false;
                     if (kState.IsKeyDown(Keys.N))
-                        inputDelta = 0.02f;
+                        inputDelta = 0.005f;
                     else
-                        inputDelta = 0.01f;
+                        inputDelta = 0.00005f;
                     if (kState.IsKeyDown(Keys.I))
                     {
                         deltaZ = inputDelta;
@@ -224,12 +247,15 @@ namespace TGC.MonoGame.TP
                     //}
                     if (update)
                     {
-                        Game.Drawer.zMul += deltaX;
-                        Game.Drawer.wMul += deltaY;
-                        Game.Drawer.depthMul += deltaZ;
+                        
+                        Game.Drawer.modEpsilon += deltaX;
+                        Game.Drawer.maxEpsilon += deltaZ;
 
-                        Debug.WriteLine("zMul " + Game.Drawer.zMul + "wMul " + Game.Drawer.wMul + " DM " + Game.Drawer.depthMul);
+                        Debug.WriteLine("mod " + Game.Drawer.modEpsilon + "max" + Game.Drawer.maxEpsilon);
+
                     }
+
+
                     #endregion
                     #endregion
                     break;

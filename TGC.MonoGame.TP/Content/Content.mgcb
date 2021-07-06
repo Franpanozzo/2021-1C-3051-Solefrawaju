@@ -13,24 +13,6 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Effects/BasicShader.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:Effects/BasicShader.fx
-
-#begin Effects/BasicTexture.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:Effects/BasicTexture.fx
-
-#begin Effects/BlinnPhong.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:Effects/BlinnPhong.fx
-
 #begin Effects/Bloom.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -49,17 +31,11 @@
 /processorParam:DebugMode=Auto
 /build:Effects/Gizmos.fx
 
-#begin Effects/MasterEffect.fx
+#begin Effects/MasterMRT.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:Effects/MasterEffect.fx
-
-#begin Effects/SkyBox.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:Effects/SkyBox.fx
+/build:Effects/MasterMRT.fx
 
 #begin Models/Laser/laser.fbx
 /importer:FbxImporter
@@ -1001,6 +977,18 @@
 /processorParam:TextureFormat=Color
 /build:Textures/TIE/TIE_IN_Diff.png
 
+#begin Textures/TIE/TIE_IN_Normal.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/TIE/TIE_IN_Normal.png
+
 #begin Textures/Trench/MetalSurface.jpg
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1037,6 +1025,18 @@
 /processorParam:TextureFormat=Color
 /build:Textures/xWing/lambert5_Base_Color.png
 
+#begin Textures/xWing/lambert5_Normal_DirectX.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/xWing/lambert5_Normal_DirectX.png
+
 #begin Textures/xWing/lambert6_Base_Color.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1048,4 +1048,16 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/xWing/lambert6_Base_Color.png
+
+#begin Textures/xWing/lambert6_Normal_DirectX.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/xWing/lambert6_Normal_DirectX.png
 

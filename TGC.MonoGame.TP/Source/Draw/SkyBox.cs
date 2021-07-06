@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+namespace TGC.MonoGame.TP
+{
     /// <summary>
     ///     Handles all of the aspects of working with a SkyBox.
     /// </summary>
@@ -29,6 +31,8 @@ using Microsoft.Xna.Framework.Graphics;
             Texture = texture;
             Effect = effect;
             Size = size;
+
+
         }
 
         /// <summary>
@@ -40,7 +44,7 @@ using Microsoft.Xna.Framework.Graphics;
         /// <summary>
         ///     The effect file that the SkyBox will use to render
         /// </summary>
-        public Effect Effect { get; }
+        public Effect Effect { get; set; }
 
         /// <summary>
         ///     The actual SkyBox texture
@@ -63,31 +67,18 @@ using Microsoft.Xna.Framework.Graphics;
         /// <param name="cameraPosition">The position of the camera</param>
         public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition)
         {
-            Effect.CurrentTechnique = Effect.Techniques["Skybox"];
-            // Go through each pass in the effect, but we know there is only one...
-            foreach (var pass in Effect.CurrentTechnique.Passes)
+            var Game = TGCGame.Instance;
+            Effect.Parameters["SkyBoxTexture"].SetValue(Texture);
+            Effect.Parameters["CameraPosition"].SetValue(cameraPosition);
+            foreach (var mesh in Model.Meshes)
             {
-                pass.Apply();
+                var world = Matrix.CreateScale(Size) * Matrix.CreateTranslation(cameraPosition);
+                var wvp = world * view * projection;
+                Effect.Parameters["World"].SetValue(world);
+                Effect.Parameters["WorldViewProjection"].SetValue(wvp);
 
-                // Draw all of the components of the mesh, but we know the cube really
-                // only has one mesh
-                foreach (var mesh in Model.Meshes)
-                {
-                    // Assign the appropriate values to each of the parameters
-                    foreach (var part in mesh.MeshParts)
-                    {
-                        part.Effect = Effect;
-                        part.Effect.Parameters["World"].SetValue(
-                            Matrix.CreateScale(Size) * Matrix.CreateTranslation(cameraPosition));
-                        part.Effect.Parameters["View"].SetValue(view);
-                        part.Effect.Parameters["Projection"].SetValue(projection);
-                        part.Effect.Parameters["SkyBoxTexture"].SetValue(Texture);
-                        part.Effect.Parameters["CameraPosition"].SetValue(cameraPosition);
-                    }
-
-                    // Draw the mesh with the SkyBox effect
-                    mesh.Draw();
-                }
+                mesh.Draw();
             }
         }
     }
+}

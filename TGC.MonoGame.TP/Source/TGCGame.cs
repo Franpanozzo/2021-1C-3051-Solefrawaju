@@ -153,10 +153,10 @@ namespace TGC.MonoGame.TP
             Xwing.MapSize = MapSize;
             Xwing.Update(0f, Camera);
 
-            LightCamera = new LightCamera(Camera.AspectRatio, Xwing.Position - Vector3.Backward * 30 + Vector3.Up * 30);
+            LightCamera = new LightCamera(Camera.AspectRatio, Xwing.Position - Vector3.Left * 150 + Vector3.Up * 150);
             //Debug.WriteLine(LightCamera.Projection.ToString());
 
-            LightCamera.BuildProjection(LightCamera.AspectRatio, 5f, 3000f, LightCamera.DefaultFieldOfViewDegrees);
+            LightCamera.BuildProjection(LightCamera.AspectRatio, 50f, 3000f, LightCamera.DefaultFieldOfViewDegrees);
             //LightCamera.BuildProjection(1f, 5f, 3000f, LightCamera.DefaultFieldOfViewDegrees);
 
             //Debug.WriteLine(LightCamera.Projection.ToString());
@@ -172,7 +172,9 @@ namespace TGC.MonoGame.TP
         public BoundingFrustum BoundingFrustum = new BoundingFrustum(Matrix.Identity);
 
         public int elementsDrawn, totalElements;
-        
+        public float RadMin = 1f;
+        public float RadMax = 30f;
+
         protected override void Update(GameTime gameTime)
         {
             float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -180,9 +182,21 @@ namespace TGC.MonoGame.TP
             Input.ProcessInput();
 
             BoundingFrustum.Matrix = SelectedCamera.View * SelectedCamera.Projection;
+            Vector3[] frustumCorners = BoundingFrustum.GetCorners();
+
+            var lvp = LightCamera.View * LightCamera.Projection;
+
+            Vector3 center = Vector3.Zero;
+            foreach (var corner in frustumCorners)
+                center += corner;
+
+            center /= frustumCorners.Length;
+
+            LightCamera.FrustumCenter = Xwing.Position;
+            LightCamera.Update(gameTime);
+            
             Vector4 zone = Vector4.One;
 
-            LightCamera.Update(gameTime);
             switch (GameState)
             {
                 case GmState.StartScreen:
@@ -247,7 +261,14 @@ namespace TGC.MonoGame.TP
 
                     Laser.AddAllRequiredtoDraw(ref Drawer.lasersToDraw, ref BoundingFrustum);
                     elementsDrawn += Drawer.lasersToDraw.Count;
-                    
+
+                    Drawer.MasterMRT.Parameters["OmniLightsRadiusMin"]?.SetValue(RadMin);
+                    Drawer.MasterMRT.Parameters["OmniLightsRadiusMax"]?.SetValue(RadMax);
+                    Drawer.MasterMRT.Parameters["OmniLightsPos"]?.SetValue(Laser.OmniLightsPos);
+                    Drawer.MasterMRT.Parameters["OmniLightsColor"]?.SetValue(Laser.OmniLightsColor);
+                    Drawer.MasterMRT.Parameters["OmniLightsCount"]?.SetValue(Laser.OmniLightsCount);
+
+
                     //Colisiones
                     Xwing.VerifyCollisions(Laser.EnemyLasers, Map);
                     //Xwing.fired.RemoveAll(laser => laser.Age >= laser.MaxAge);
@@ -255,9 +276,7 @@ namespace TGC.MonoGame.TP
                     
                     TieFighter.UpdateEnemies(elapsedTime, Xwing);
                     
-                    Drawer.EffectLight.Parameters["lightPosition"].SetValue(LightCamera.Position);
-                    Drawer.EffectLight.Parameters["eyePosition"].SetValue(SelectedCamera.Position);
-
+                    
                     SoundManager.UpdateRandomDistantSounds(elapsedTime);
                     #endregion
                     break;
@@ -297,27 +316,13 @@ namespace TGC.MonoGame.TP
             base.Update(gameTime);
         }
 
-        public bool ApplyBloom = false;
-        public bool ApplyShadowMap = false;
         protected override void Draw(GameTime gameTime)
         {
             float deltaTime = Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds);
             FPS = (int)Math.Round(1 / deltaTime);
             
-            if (!ApplyBloom && !ApplyShadowMap)
-                Drawer.DrawRegular();
-            
+            Drawer.DrawMRT();
 
-            if (ApplyBloom)
-                Drawer.DrawBloom();
-
-
-            #region ShadowMap
-            if (ApplyShadowMap)
-            {
-                Drawer.DrawShadowed();
-            }
-            #endregion
             if (ShowGizmos)
                 Gizmos.Draw();
             HUD.Draw();
