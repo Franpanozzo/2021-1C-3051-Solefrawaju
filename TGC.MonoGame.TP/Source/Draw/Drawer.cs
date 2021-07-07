@@ -295,10 +295,18 @@ namespace TGC.MonoGame.TP
                 MasterMRT.Parameters["BloomFilter"].SetValue(BloomFilterTarget);
                 MasterMRT.Parameters["LightColor"].SetValue(new Vector3(1f, 1f, 1f));
                 MasterMRT.Parameters["AmbientLightColor"].SetValue(new Vector3(0.98f, 0.9f, 1f));
-                MasterMRT.Parameters["AmbientLightIntensity"].SetValue(0.3f);
+                MasterMRT.Parameters["AmbientLightIntensity"].SetValue(0.35f);
 
 
                 FullScreenQuad.Draw(MasterMRT);
+                /*
+                 TODO: Integrate directional light in the same step as the calc,
+                add H&V Blur RTs to the PS, to reduce rendertarget switching 
+                from 6 (Shadow, GBuf, DirL, IntL, BlurHV, Final)  
+                to 4 (Shadow, Gbuf, DirL-IntL-BlurHV, Final)
+
+                replace Effect.Parameters["x"].SetValue(xx) with EPMRTxxxx variables
+                 */
 
                 GraphicsDevice.SetRenderTarget(SceneTarget);
                 MasterMRT.CurrentTechnique = MasterMRT.Techniques["IntegrateLight"];

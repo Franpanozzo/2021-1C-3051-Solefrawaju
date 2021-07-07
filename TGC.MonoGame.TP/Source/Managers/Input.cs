@@ -72,11 +72,20 @@ namespace TGC.MonoGame.TP
                     Game.Drawer.debugShadowMap = !Game.Drawer.debugShadowMap;
                 }
             }
-            
+            if (kState.IsKeyDown(Keys.Y))
+            {
+                if (!ignoredKeys.Contains(Keys.Y))
+                {
+                    ignoredKeys.Add(Keys.Y);
+
+                    Game.BackgroundCombat.Generate();
+                    //Game.Drawer.debugShadowMap = !Game.Drawer.debugShadowMap;
+                }
+            }
             //Game.ShowShadowMap = kState.IsKeyDown(Keys.O);
 
-                //if (kState.IsKeyDown(Keys.D1))
-                //    Game.Drawer.ShowTarget = 1;
+            //if (kState.IsKeyDown(Keys.D1))
+            //    Game.Drawer.ShowTarget = 1;
             else if (kState.IsKeyDown(Keys.D2))
                 Game.Drawer.ShowTarget = 2;
             else if (kState.IsKeyDown(Keys.D3))

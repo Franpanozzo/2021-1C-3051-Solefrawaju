@@ -75,7 +75,7 @@ namespace TGC.MonoGame.TP
        
         public Drawer Drawer;
 
-        BackgroundCombat BackgroundCombat;
+        public BackgroundCombat BackgroundCombat;
         protected override void Initialize()
         {
             // La logica de inicializacion que no depende del contenido se recomienda poner en este metodo.
