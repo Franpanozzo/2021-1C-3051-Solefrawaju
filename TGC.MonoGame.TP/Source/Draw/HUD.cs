@@ -68,7 +68,7 @@ namespace TGC.MonoGame.TP
                                             Content.Load<Texture2D>(ContentFolderTextures + "Crosshair/crosshairAlpha")};
 
             HudEnergy = loadNumberedTextures("HUD/Energy/", 0, 10, 1);
-            HPBar = loadNumberedTextures("HUD/TopLeft/", 0, 100, 10);
+            HPBar = loadNumberedTextures("HUD/Health/", 0, 100, 5);
             
             BtnPlay = Content.Load<Texture2D>(ContentFolderTextures + "HUD/Buttons/Jugar");
             BtnContinue = Content.Load<Texture2D>(ContentFolderTextures + "HUD/Buttons/Continuar");
@@ -251,10 +251,10 @@ namespace TGC.MonoGame.TP
                     
                     SpriteBatch.Draw(HPBar[Game.Xwing.GetHPIndex()], new Vector2(0, 20f), null, Color.White, 0f, Vector2.Zero, new Vector2(1f, 1f), SpriteEffects.None, 0f);
 
-                    //topMessage = "FPS " + Game.FPS + " HP " + Game.Xwing.HP;
-                    topMessage = "E " + Game.elementsDrawn + "/" + Game.totalElements +
-                        " Pos " + Game.IntVector3ToStr(Game.Xwing.Position) +
-                        " Light " + Game.IntVector3ToStr(Game.LightCamera.Position);
+                    topMessage = "FPS " + Game.FPS;
+                    //topMessage = "E " + Game.elementsDrawn + "/" + Game.totalElements +
+                    //    " Pos " + Game.IntVector3ToStr(Game.Xwing.Position) +
+                    //    " Light " + Game.IntVector3ToStr(Game.LightCamera.Position);
 
 
                     SpriteBatch.DrawString(SpriteFont, topMessage, new Vector2(80, 45), Color.White);

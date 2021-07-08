@@ -52,6 +52,7 @@ namespace TGC.MonoGame.TP
             Instance = this;
             Xwing = new Xwing();
             Gizmos = new Gizmos();
+            
         }
         public GmState GameState { get; set; }
         public GraphicsDeviceManager Graphics { get; }
@@ -120,13 +121,13 @@ namespace TGC.MonoGame.TP
             Map = Trench.GenerateMap(MapSize);
             System.Diagnostics.Debug.WriteLine(Trench.ShowMapInConsole(Map, MapSize));
 
-           
             
             base.Initialize();
+            
+            Window.Title = "Star Wars: Trench Run";
+            Window.IsBorderless = true;
         }
 
-       
-        
 
         public float kd = 0.8f;
         public float ks = 0.4f;
@@ -148,12 +149,12 @@ namespace TGC.MonoGame.TP
             Camera.MapLimit = MapLimit;
             Camera.MapSize = MapSize;
             Camera.BlockSize = blockSize;
-            Camera.Position = new Vector3(MapLimit/2 - blockSize/2, 0, blockSize /2);
+            Camera.Position = new Vector3(MapLimit/2 - blockSize/2, 70, blockSize /2);
             Xwing.MapLimit = MapLimit;
             Xwing.MapSize = MapSize;
             Xwing.Update(0f, Camera);
 
-            LightCamera = new LightCamera(Camera.AspectRatio, Xwing.Position - Vector3.Left * 150 + Vector3.Up * 150);
+            LightCamera = new LightCamera(Camera.AspectRatio, Xwing.Position - Vector3.Left * 150 + Vector3.Up * 86);
             //Debug.WriteLine(LightCamera.Projection.ToString());
 
             LightCamera.BuildProjection(LightCamera.AspectRatio, 50f, 3000f, LightCamera.DefaultFieldOfViewDegrees);

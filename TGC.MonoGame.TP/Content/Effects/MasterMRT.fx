@@ -117,7 +117,7 @@ struct PSOMRT
 
 
 
-float ApplyLightEffect;
+//float ApplyLightEffect;
 float3 OmniLightsPos[20];
 float3 OmniLightsColor[20];
 int OmniLightsCount;
@@ -318,6 +318,15 @@ float4 DepthPS(VSOdepth input) : COLOR
 }
 
 /* DIRECTIONAL LIGHT CALC AND INT */
+
+static const int kernel_r = 6;
+static const int kernel_size = 13;
+static const float Kernel[kernel_size] =
+{
+    0.002216, 0.008764, 0.026995, 0.064759, 0.120985, 0.176033, 0.199471, 0.176033, 0.120985, 0.064759, 0.026995, 0.008764, 0.002216,
+};
+float2 screenSize;
+
 texture ColorMap;
 sampler colorSampler = sampler_state
 {
@@ -371,6 +380,12 @@ struct DLightVSO
     float4 Position : POSITION0;
     float2 TexCoord : TEXCOORD0;
 };
+struct DLightPSO
+{
+    float4 Scene : COLOR0;
+    float4 BlurH: COLOR1;
+    float4 BlurV : COLOR2;
+};
 
 DLightVSO DLightVS(DLightVSI input)
 {
@@ -381,48 +396,76 @@ DLightVSO DLightVS(DLightVSI input)
 }
 
 
-float4 DLightPS(DLightVSO input) : COLOR0
+DLightPSO DLightPS(DLightVSO input) : COLOR0
 {
-    float applyLighting = tex2D(bloomFilterSampler, input.TexCoord).w;
+    DLightPSO output = (DLightPSO) 0;
     
-    if (applyLighting == 0.0)
-        return float4(1, 1, 1, 0);
+    float4 bloomFilter = tex2D(bloomFilterSampler, input.TexCoord);
+    float applyLighting = bloomFilter.w;
     
     //get original pixel color
     float4 colorMap = tex2D(colorSampler, input.TexCoord);
     
     float3 texColor = colorMap.rgb;
         
-    //get normal data from the normalMap
-    float4 normalData = tex2D(normalMapSampler, input.TexCoord);
-    //tranform normal back into [-1,1] range
-    float3 normal = 2.0f * normalData.xyz - 1.0;
+    if (applyLighting == 0.0)
+        output.Scene = float4(texColor, 1);
+    else
+    {
     
-    //get dir to cam map
-    float4 dirToCamMap = tex2D(dirToCamSampler, input.TexCoord);
+        //get normal data from the normalMap
+        float4 normalData = tex2D(normalMapSampler, input.TexCoord);
+        //tranform normal back into [-1,1] range
+        float3 normal = 2.0f * normalData.xyz - 1.0;
     
-    float3 OmniLight = float3(colorMap.a, normalData.a, dirToCamMap.a);
+        //get dir to cam map
+        float4 dirToCamMap = tex2D(dirToCamSampler, input.TexCoord);
     
-    //surface-to-light vector
-    float3 lightVector = -normalize(LightDirection);
+        //float3 OmniLight = float3(colorMap.a, normalData.a, dirToCamMap.a);
+    
+        //surface-to-light vector
+        float3 lightVector = -normalize(LightDirection);
 
-    //compute diffuse light (directional)
-    float NdL = max(0, dot(normal, lightVector));
-    float3 directionalLight = NdL * LightColor;
+        //compute diffuse light (directional)
+        float NdL = max(0, dot(normal, lightVector));
+        float3 directionalLight = NdL * LightColor;
     
  
-    //float3 diffuseLight = directionalLight + omniLights;
-    float3 diffuseLight = directionalLight + OmniLight;
+        float3 diffuseLight = directionalLight;
     
-    //reflexion vector
-    float3 reflectionVector = normalize(reflect(-lightVector, normal));
-    //convert back to [-1, 1]
-    float3 directionToCamera = 2.0 * dirToCamMap.xyz - 1.0;
+        //reflexion vector
+        float3 reflectionVector = normalize(reflect(-lightVector, normal));
+        //convert back to [-1, 1]
+        float3 directionToCamera = 2.0 * dirToCamMap.xyz - 1.0;
     
-    //compute specular light
-    float specularLight = SpecularIntensity * pow(saturate(dot(reflectionVector, directionToCamera)), SpecularPower);
+        //compute specular light
+        float specularLight = SpecularIntensity * pow(saturate(dot(reflectionVector, directionToCamera)), SpecularPower);
 
-    return float4(AmbientLightColor * AmbientLightIntensity + diffuseLight, specularLight);
+    
+        
+        //return float4(AmbientLightColor * AmbientLightIntensity + diffuseLight, specularLight);
+    
+        //integrate
+        float3 ambientDiffuse = AmbientLightColor * AmbientLightIntensity + diffuseLight;
+        output.Scene = float4((texColor * ambientDiffuse + specularLight), 1);
+    }
+    
+    //Calculate horizontal and vertical blur for the bloom filter
+    float4 hColor = float4(0, 0, 0, 1);
+    float4 vColor = float4(0, 0, 0, 1);
+    
+    for (int i = 0; i < kernel_size; i++)
+    {
+        float2 scaledTextureCoordinatesH = input.TexCoord+ float2(0, (float) (i - kernel_r) / screenSize.x);
+        float2 scaledTextureCoordinatesV = input.TexCoord + float2(0, (float) (i - kernel_r) / screenSize.y);
+        hColor += tex2D(bloomFilterSampler, scaledTextureCoordinatesH) * Kernel[i];
+        vColor += tex2D(bloomFilterSampler, scaledTextureCoordinatesH) * Kernel[i];
+    }
+    
+    output.BlurH = hColor;
+    output.BlurV = vColor;
+    
+    return output;
 }
 
 texture LightMap;
@@ -445,7 +488,7 @@ float4 IntLightPS(DLightVSO input) : COLOR
     return float4((diffuseColor * diffuseLight + specularLight), 1);
 }
 
-technique DirectionalLight
+technique CalcIntLightBlur
 {
     pass Pass0
     {

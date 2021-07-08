@@ -54,28 +54,29 @@ namespace TGC.MonoGame.TP
 			return hit;
         }
 		TGCGame Game;
+		public int SelectedIndex = 0; 
 		public void Update(float elapsedTime)
         {
 			var xwing = Game.Xwing;
 			Turrets.ForEach(turret => turret.Update(xwing, elapsedTime));
 			Turrets.RemoveAll(turret => turret.needsRemoval);
 
-
 			if (Type == TrenchType.Platform || Type == TrenchType.Straight)
 			{
 				var distance = Vector3.Distance(xwing.Position, Position);
 				if (distance < 400)
-					SelectedModel = Models[0];
+					SelectedIndex = 0;
 				else if (distance < 600)
-					SelectedModel = Models[1];
+					SelectedIndex = 1;
 				else if (distance < 900)
-					SelectedModel = Models[2];
+					SelectedIndex = 2;
 				else
-					SelectedModel = Models[3];
+					SelectedIndex = 3;
 			}
 			else
-				SelectedModel = Models[0];
-
+				SelectedIndex = 0;
+			
+			SelectedModel = Models[SelectedIndex];
 		}
 		/*Static elements*/
 		private static Trench GetNextTrench(Trench input, float rotation)
@@ -595,7 +596,7 @@ namespace TGC.MonoGame.TP
                             R = Matrix.Identity;
 
                             turretDelta = calculateTurretDelta(
-                                block.Rotation,
+                                0f,
                                 new Vector3(82.4f, 8f, -145.7f),
                                 new Vector3(-63.3f, 8f, 50.7f),
                                 TrenchType.Intersection);
@@ -612,11 +613,14 @@ namespace TGC.MonoGame.TP
 							break;
                     }
 
-                    block.SRT =
-                        S * R * Matrix.CreateRotationY(MathHelper.ToRadians(block.Rotation)) *
-                        Matrix.CreateTranslation(block.Position) * T;
+					if(block.Type.Equals(TrenchType.Intersection))
+                    	block.SRT = S * R * Matrix.CreateTranslation(block.Position) * T;
+					else
+						block.SRT = S * R * Matrix.CreateRotationY(MathHelper.ToRadians(block.Rotation)) *
+									Matrix.CreateTranslation(block.Position) * T;
 
                     
+
                     if (r < 30) // %30 chance de tener una torre
                         block.Turrets.Add(new TrenchTurret());
                     if (r < 10) // %10 chance de tener dos

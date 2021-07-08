@@ -28,7 +28,7 @@ namespace TGC.MonoGame.TP
         static SoundEffect Distant2R;
         static SoundEffect Distant3L;
         static SoundEffect Distant3R;
-        static SoundEffect Repair;
+        static SoundEffect Slide;
         static Song MainTheme;
 
         public static float MasterVolume = 1f;
@@ -71,7 +71,7 @@ namespace TGC.MonoGame.TP
             Distant2R = Content.Load<SoundEffect>(ContentFolderSounds + "distant2R");
             Distant3L = Content.Load<SoundEffect>(ContentFolderSounds + "distant3L");
             Distant3R = Content.Load<SoundEffect>(ContentFolderSounds + "distant3R");
-            Repair = Content.Load<SoundEffect>(ContentFolderSounds + "repair");
+            Slide = Content.Load<SoundEffect>(ContentFolderSounds + "slide");
 
             MainTheme = Content.Load<Song>(ContentFolderMusic + "TheImperialMarch");
 
@@ -113,6 +113,10 @@ namespace TGC.MonoGame.TP
                 case Effect.BoostStop:
                     sound = BoostStop.CreateInstance();
                     break;
+                case Effect.Slide:
+                    sound = Slide.CreateInstance();
+                    break;
+
                 default:
                     return null;
             }
@@ -274,7 +278,7 @@ namespace TGC.MonoGame.TP
             Distant1,
             Distant2,
             Distant3,
-            Repair
+            Slide
         }
     }
 }
