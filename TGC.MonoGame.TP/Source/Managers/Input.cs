@@ -68,10 +68,18 @@ namespace TGC.MonoGame.TP
                 if (!ignoredKeys.Contains(Keys.P))
                 {
                     ignoredKeys.Add(Keys.P);
-                    //Game.ApplyBloom = !Game.ApplyBloom;
-                    //Game.ApplyShadowMap = !Game.ApplyShadowMap;
 
-                    //Game.Drawer.saveToFile = true;
+                    Game.Drawer.debugShadowMap = !Game.Drawer.debugShadowMap;
+                }
+            }
+            if (kState.IsKeyDown(Keys.Y))
+            {
+                if (!ignoredKeys.Contains(Keys.Y))
+                {
+                    ignoredKeys.Add(Keys.Y);
+
+                    Game.BackgroundCombat.Generate();
+                    //Game.Drawer.debugShadowMap = !Game.Drawer.debugShadowMap;
                 }
             }
             //Game.ShowShadowMap = kState.IsKeyDown(Keys.O);

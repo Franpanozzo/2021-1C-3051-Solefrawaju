@@ -10,6 +10,7 @@ namespace TGC.MonoGame.TP
 	public class Xwing
 	{
 		public int HP { get; set; }
+		public bool damageEnabled = true;
 		public int Score { get; set; }
 		public int Energy = 10;
 		public bool prevBoostState = false;
@@ -72,8 +73,10 @@ namespace TGC.MonoGame.TP
             //updateRoll();
             //actualizo todos los parametros importantes del xwing
             updateSRT(camera);
-			//actualizo 
+			
 			updateFireRate();
+
+			updateSlideDamage();
 
 			updateEnergyRegen(elapsedTime);
             if (boundingSphere == null)
@@ -158,15 +161,21 @@ namespace TGC.MonoGame.TP
 		}
 		public int GetHPIndex()
         {
-			return HP / 10;
+			return HP / 5;
         }
 		enum Dir
         {
 			Up,Down,Left,Right
         }
+		public bool sliding = false;
+		
+		const int correctionFrames = 50;
+		bool[] correctionsPerFrame = new bool[correctionFrames];
+		int frameIndex = 0;
+		bool collided = false;
 		public void VerifyCollisions(List<Laser> enemyLasers, Trench[,] map)
 		{
-			
+
 			if (barrelRolling)
 				return;
 			var laserHit = false;
@@ -174,22 +183,26 @@ namespace TGC.MonoGame.TP
 			if (hitBy != null)
 			{
 				laserHit = true;
-				//HP -= 10;
-                
-				if(HP <= 0)
-                {
+				if (damageEnabled)
+					HP -= 5;
+
+				if (HP <= 0)
+				{
 					SoundManager.Play3DSoundAt(SoundManager.Effect.TurretExplosion, Position);
 					SoundManager.StopSound(soundBoost);
 					Game.ChangeGameStateTo(TGCGame.GmState.Defeat);
 					//Game.SelectedCamera = Game.Camera;
 					//               Debug.WriteLine("Defeat");
 					return; //no elimino el laser
-                }
-                enemyLasers.Remove(hitBy);
+				}
+				enemyLasers.Remove(hitBy);
 			}
 			// me fijo si el xwing esta por debajo del eje Y (posible colision con trench)
 			// y adentro (entre las paredes) del bloque actual
 			bool inTrench = false;
+
+			collided = false;
+
 			if (Position.Y <= 0)
 			{
 				int x = (int)CurrentBlock.X;
@@ -203,7 +216,7 @@ namespace TGC.MonoGame.TP
 				else
 				{
 					if (Position.Y <= -50)
-                    {
+					{
 						attemptToCorrect(Dir.Up, ref block, true);
 					}
 					else if (Position.Y >= -2 && block.IsInTrench(OBB))
@@ -219,21 +232,32 @@ namespace TGC.MonoGame.TP
 								attemptToCorrect(Dir.Right, ref block, null);
 							else if (block.IsInTrench(OBBR))
 								attemptToCorrect(Dir.Left, ref block, null);
-							//else if (block.IsInTrench(OBBD))
-							//	attemptToCorrect(Dir.Up, ref block, null);
-							//if (block.IsInTrench(OBBU))
-							//	attemptToCorrect(Dir.Down, ref block);
-
 						}
 					}
 				}
-					
-				
-            }
+			}
+			int recentCollisions = 0;
+			for (int i = 0; i < correctionFrames; i++)
+				if(correctionsPerFrame[i])
+					recentCollisions++;
 
-            hit = inTrench || laserHit;
+			sliding = recentCollisions >= 2;
+		
 
+			frameIndex++;
+			frameIndex %= correctionFrames;
 
+			correctionsPerFrame[frameIndex] = collided;
+
+			hit = inTrench || laserHit;
+
+			//String s = " ";
+			//for (int i = 0; i < correctionFrames; i++)
+			//	if (correctionsPerFrame[i])
+			//		s += "1 ";
+			//	else
+			//		s += "0 ";
+			//Debug.WriteLine("sliding " + sliding + " fi" + frameIndex + s) ;
         }
 		float collisionCorrectionDeltaY = 3f;
 		float collisionCorrectionDeltaXZ = 0.5f;
@@ -298,6 +322,7 @@ namespace TGC.MonoGame.TP
 			Game.Camera.Pitch = Pitch;
 			Game.Camera.Yaw = Yaw;
 
+			collided = true;
 			//tries = 0;
 		}
 		Matrix YPR, T, ScaleMatrix;
@@ -419,7 +444,34 @@ namespace TGC.MonoGame.TP
 		{
 			betweenFire += fireRate * 30f * Time;		
 		}
-		
+		float slideDamagetimer = 0f;
+
+
+		void updateSlideDamage()
+        {
+			slideDamagetimer += Time;
+
+			if(slideDamagetimer >=1f )
+            {
+				slideDamagetimer = 0;
+
+				if(sliding)
+                {
+					if (damageEnabled)
+						HP -= 5;
+
+					if (HP <= 0)
+					{
+						SoundManager.Play3DSoundAt(SoundManager.Effect.TurretExplosion, Position);
+						SoundManager.StopSound(soundBoost);
+						Game.ChangeGameStateTo(TGCGame.GmState.Defeat);
+					}
+
+					SoundManager.PlaySound(SoundManager.Effect.Slide, 0.35f);	
+                }
+            }
+		}
+
 		float energyTimer = 0f;
 		SoundEffectInstance soundBoost;
 		public float boostTime = 0f;

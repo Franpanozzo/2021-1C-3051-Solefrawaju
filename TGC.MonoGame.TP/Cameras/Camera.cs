@@ -10,7 +10,7 @@ public abstract class Camera
     //public const float DefaultNearPlaneDistance = 20.5f;
     //public const float DefaultFarPlaneDistance = 1300;
     public const float DefaultNearPlaneDistance = 5f;
-    public const float DefaultFarPlaneDistance = 1500;
+    public const float DefaultFarPlaneDistance = 1600;
 
     public Camera(float aspectRatio, float nearPlaneDistance = DefaultNearPlaneDistance,
         float farPlaneDistance = DefaultFarPlaneDistance) : this(aspectRatio, nearPlaneDistance, farPlaneDistance,

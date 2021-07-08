@@ -7,6 +7,7 @@ namespace TGC.MonoGame.TP
 {
     public class MyCamera : Camera
     {
+        bool debugging = false;
 
         private readonly Point screenCenter;
         public bool MouseLookEnabled = true;
@@ -25,7 +26,6 @@ namespace TGC.MonoGame.TP
         public float MouseSensitivity { get; set; } = 10f;
         float CurrentMovementSpeed, CurrentTurnSpeed, SpeedMultiplier = 1f;
 
-        bool debugging = false;
 
         public MyCamera(float aspectRatio, Vector3 position, Point screenCenter) : this(aspectRatio, position)
         {

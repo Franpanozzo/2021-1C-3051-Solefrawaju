@@ -52,6 +52,7 @@ namespace TGC.MonoGame.TP
             Instance = this;
             Xwing = new Xwing();
             Gizmos = new Gizmos();
+            
         }
         public GmState GameState { get; set; }
         public GraphicsDeviceManager Graphics { get; }
@@ -75,7 +76,7 @@ namespace TGC.MonoGame.TP
        
         public Drawer Drawer;
 
-        BackgroundCombat BackgroundCombat;
+        public BackgroundCombat BackgroundCombat;
         protected override void Initialize()
         {
             // La logica de inicializacion que no depende del contenido se recomienda poner en este metodo.
@@ -120,13 +121,13 @@ namespace TGC.MonoGame.TP
             Map = Trench.GenerateMap(MapSize);
             System.Diagnostics.Debug.WriteLine(Trench.ShowMapInConsole(Map, MapSize));
 
-           
             
             base.Initialize();
+            
+            Window.Title = "Star Wars: Trench Run";
+            Window.IsBorderless = true;
         }
 
-       
-        
 
         public float kd = 0.8f;
         public float ks = 0.4f;
@@ -148,12 +149,12 @@ namespace TGC.MonoGame.TP
             Camera.MapLimit = MapLimit;
             Camera.MapSize = MapSize;
             Camera.BlockSize = blockSize;
-            Camera.Position = new Vector3(MapLimit/2 - blockSize/2, 0, blockSize /2);
+            Camera.Position = new Vector3(MapLimit/2 - blockSize/2, 70, blockSize /2);
             Xwing.MapLimit = MapLimit;
             Xwing.MapSize = MapSize;
             Xwing.Update(0f, Camera);
 
-            LightCamera = new LightCamera(Camera.AspectRatio, Xwing.Position - Vector3.Left * 150 + Vector3.Up * 150);
+            LightCamera = new LightCamera(Camera.AspectRatio, Xwing.Position - Vector3.Left * 150 + Vector3.Up * 86);
             //Debug.WriteLine(LightCamera.Projection.ToString());
 
             LightCamera.BuildProjection(LightCamera.AspectRatio, 50f, 3000f, LightCamera.DefaultFieldOfViewDegrees);
@@ -245,8 +246,8 @@ namespace TGC.MonoGame.TP
                         for (int z = (int)zone.Z; z < zone.W; z++)
                         {
                             var block = Map[x, z];
-                            block.Turrets.ForEach(turret => turret.Update(Xwing, elapsedTime));
-                            block.Turrets.RemoveAll(turret => turret.needsRemoval);
+                            
+                            block.Update(elapsedTime);
 
                             if(BoundingFrustum.Intersects(block.BB))
                                 Drawer.trenchesToDraw.Add(Map[x, z]);
@@ -328,23 +329,7 @@ namespace TGC.MonoGame.TP
             HUD.Draw();
 
         }
-        
-        
 
-
-
-        public static Model GetModelFromType(TrenchType type)
-        {
-            switch(type)
-            {
-                case TrenchType.Platform:        return Drawer.TrenchPlatform;
-                case TrenchType.Straight:        return Drawer.TrenchStraight;
-                case TrenchType.T:               return Drawer.TrenchT;
-                case TrenchType.Intersection:    return Drawer.TrenchIntersection;
-                case TrenchType.Elbow:           return Drawer.TrenchElbow;
-                default:                         return Drawer.TrenchPlatform;
-            }
-        }
         public enum GmState
         {
             StartScreen,

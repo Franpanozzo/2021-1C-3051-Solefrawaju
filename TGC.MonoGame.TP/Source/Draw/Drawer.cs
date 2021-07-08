@@ -22,11 +22,11 @@ namespace TGC.MonoGame.TP
         public Model XwingModel;
         private Model XwingEnginesModel;
 
-        public static Model TrenchPlatform;
-        public static Model TrenchStraight;
-        public static Model TrenchT;
-        public static Model TrenchIntersection;
-        public static Model TrenchElbow;
+        public static Model[] TrenchPlatform;
+        public static Model[] TrenchStraight;
+        public static Model[] TrenchT;
+        public static Model[] TrenchIntersection;
+        public static Model[] TrenchElbow;
         public static Model TrenchTurret;
         SkyBox SkyBox;
         Model skyboxModel;
@@ -88,18 +88,40 @@ namespace TGC.MonoGame.TP
             SpriteBatch = new SpriteBatch(GraphicsDevice);
             LoadContent();
         }
+        Model[] loadNumberedModels(String source, int start, int end, int inc)
+        {
+            List<Model> models = new List<Model>();
+            for (int n = start; n <= end; n += inc)
+                models.Add(Content.Load<Model>(ContentFolder3D + source + n));
+
+            return models.ToArray();
+        }
         void LoadContent()
         {
             TieModel = Content.Load<Model>(ContentFolder3D + "TIE/TIE");
             XwingModel = Content.Load<Model>(ContentFolder3D + "XWing/model");
             XwingEnginesModel = Content.Load<Model>(ContentFolder3D + "XWing/xwing-engines");
 
-            TrenchPlatform = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Platform-Block");
-            TrenchStraight = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Straight-Block");
-            TrenchT = Content.Load<Model>(ContentFolder3D + "Trench/Trench-T-Block");
-            TrenchElbow = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Elbow-Block");
-            TrenchIntersection = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Intersection");
+
+            TrenchPlatform = loadNumberedModels("Trench/Platform/", 0, 3, 1);
+            TrenchStraight = loadNumberedModels("Trench/Straight/", 0, 3, 1);
+            //TrenchT = loadNumberedModels("Trench/T/", 0, 3, 1);
+            //TrenchElbow = loadNumberedModels("Trench/Elbow/", 0, 3, 1);
+            //TrenchIntersection = loadNumberedModels("Trench/Intersection/", 0, 3, 1);
+
+            //TrenchPlatform = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/Trench-Platform-Block") };
+            //TrenchStraight = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/Trench-Straight-Block") };
+            TrenchT = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/T/0") };
+            TrenchElbow = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/Elbow/0") };
+            TrenchIntersection = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/Intersection/0") };
+
+            //TrenchPlatform = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Platform-Block");
+            //TrenchStraight = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Straight-Block");
+            //TrenchT = Content.Load<Model>(ContentFolder3D + "Trench/Trench-T-Block");
+            //TrenchElbow = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Elbow-Block");
+            //TrenchIntersection = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Intersection");
             TrenchTurret = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Turret");
+
             //Trench2 = Content.Load<Model>(ContentFolder3D + "Trench2/Trench");
             LaserModel = Content.Load<Model>(ContentFolder3D + "Laser/Laser");
 
@@ -122,8 +144,13 @@ namespace TGC.MonoGame.TP
             
             SkyBox = new SkyBox(skyboxModel, skyBoxTexture, MasterMRT);
 
-            assignEffectToModels(new Model[] { TieModel, XwingModel, XwingEnginesModel, TrenchElbow,
-                TrenchIntersection, TrenchPlatform, TrenchStraight, TrenchT, TrenchTurret, LaserModel, SkyBox.Model }, MasterMRT);
+            assignEffectToModels(new Model[] { TieModel, XwingModel, XwingEnginesModel, TrenchTurret, LaserModel, SkyBox.Model }, MasterMRT);
+            
+            assignEffectToModels(TrenchElbow, MasterMRT);
+            assignEffectToModels(TrenchIntersection, MasterMRT);
+            assignEffectToModels(TrenchPlatform, MasterMRT);
+            assignEffectToModels(TrenchStraight, MasterMRT);
+            assignEffectToModels(TrenchT, MasterMRT);
 
             manageEffectParameters();
             
@@ -172,23 +199,24 @@ namespace TGC.MonoGame.TP
             var CameraView = Game.SelectedCamera.View;
             var CameraProjection = Game.SelectedCamera.Projection;
             var CameraPosition = Game.SelectedCamera.Position;
-            MasterMRT.Parameters["ApplyLightEffect"]?.SetValue(0f);
-            MasterMRT.Parameters["InvertViewProjection"]?.SetValue(Matrix.Invert(CameraView * CameraProjection));
-            MasterMRT.Parameters["CameraPosition"].SetValue(CameraPosition);
-            MasterMRT.Parameters["LightDirection"].SetValue(Game.LightCamera.FrontDirection);
-            MasterMRT.Parameters["SpecularIntensity"].SetValue(SpecularIntensity);
-            MasterMRT.Parameters["SpecularPower"].SetValue(SpecularPower);
+
+            //MRTapplyLightEffect.SetValue(0f);
+            //MRTinvertViewProjection.SetValue(Matrix.Invert(CameraView * CameraProjection));
+            MRTcameraPosition.SetValue(CameraPosition);
+            MRTlightDirection.SetValue(Game.LightCamera.FrontDirection);
+            MRTspecularIntensity.SetValue(SpecularIntensity);
+            MRTspecularPower.SetValue(SpecularPower);
 
             if (dt == DrawType.Regular)
             {
 
-                MasterMRT.CurrentTechnique = ETMRTskybox;
+                MasterMRT.CurrentTechnique = MRTskybox;
                 SkyBox.Draw(CameraView, CameraProjection, CameraPosition);
             }
             if(dt == DrawType.DepthMap)
-                MasterMRT.CurrentTechnique = ETMRTshadowmap;
+                MasterMRT.CurrentTechnique = MRTshadowMap;
             
-            MasterMRT.Parameters["ApplyLightEffect"]?.SetValue(1f);
+            //MasterMRT.Parameters["ApplyLightEffect"]?.SetValue(1f);
             if (Game.GameState.Equals(TGCGame.GmState.Running) ||
                 Game.GameState.Equals(TGCGame.GmState.Paused) ||
                 Game.GameState.Equals(TGCGame.GmState.Defeat))
@@ -208,15 +236,19 @@ namespace TGC.MonoGame.TP
                 }
                 if (dt == DrawType.Regular)
                 {
-                    MasterMRT.CurrentTechnique = ETMRTbasicColor;
-                    EPMRTaddToBloomFilter.SetValue(1f);
-                    MasterMRT.Parameters["ApplyLightEffect"]?.SetValue(0f);
+                    MasterMRT.CurrentTechnique = MRTbasicColor;
+                    MRTaddToBloomFilter.SetValue(1f);
+                    //MasterMRT.Parameters["ApplyLightEffect"]?.SetValue(0f);
+                    //MRTapplyLightEffect.SetValue(0f);
+
                     foreach (var laser in lasersToDraw)
                         DrawModelMRT(LaserModel, laser.SRT, laser.Color);
                     
-                    EPMRTaddToBloomFilter.SetValue(0f);
-                    MasterMRT.Parameters["ApplyLightEffect"]?.SetValue(1f);
-                    EPMRTcolor.SetValue(new Vector3(0.5f, 0.5f, 0.5f));
+                    MRTaddToBloomFilter.SetValue(0f);
+                    //MasterMRT.Parameters["ApplyLightEffect"]?.SetValue(1f);
+                    //MRTapplyLightEffect.SetValue(1f);
+
+                    MRTcolor.SetValue(new Vector3(0.5f, 0.5f, 0.5f));
 
                     MasterMRT.CurrentTechnique = MasterMRT.Techniques["TrenchDraw"];
                 }
@@ -232,7 +264,6 @@ namespace TGC.MonoGame.TP
         public void DrawMRT()
         {
             /* Draw Shadow Map*/
-            MasterMRT.CurrentTechnique = MasterMRT.Techniques["DepthPass"];
             MasterMRT.Parameters["modulatedEpsilon"].SetValue(modEpsilon);
             MasterMRT.Parameters["maxEpsilon"].SetValue(maxEpsilon);
 
@@ -249,48 +280,32 @@ namespace TGC.MonoGame.TP
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
             GraphicsDevice.BlendState = BlendState.Opaque;
 
-            MasterMRT.Parameters["ShadowMap"].SetValue(ShadowMapRenderTarget);
-            MasterMRT.Parameters["ShadowMapSize"]?.SetValue(ShadowMapSize);
-            EPMRTlightViewProjection.SetValue(Game.LightCamera.View * Game.LightCamera.Projection);
+
+            MRTshadowMapTex.SetValue(ShadowMapRenderTarget);
+            //MasterMRT.Parameters["ShadowMapSize"]?.SetValue(ShadowMapSize);
+            MRTlightViewProjection.SetValue(Game.LightCamera.View * Game.LightCamera.Projection);
 
             DrawSceneMRT(DrawType.Regular);
-
+            
             if (ShowTarget == 0)
             {
 
-                /* Calculate lights */
-                GraphicsDevice.SetRenderTarget(LightTarget);
+                /* Calculate and integrate lights, also blur the filtered bloom*/
+                GraphicsDevice.SetRenderTargets(SceneTarget, BlurHRenderTarget, BlurVRenderTarget);
 
-                MasterMRT.CurrentTechnique = MasterMRT.Techniques["DirectionalLight"];
-                MasterMRT.Parameters["ColorMap"].SetValue(ColorTarget);
-                MasterMRT.Parameters["DirToCamMap"].SetValue(DirToCamTarget);
-                MasterMRT.Parameters["NormalMap"].SetValue(NormalTarget);
-                MasterMRT.Parameters["BloomFilter"].SetValue(BloomFilterTarget);
-                MasterMRT.Parameters["LightColor"].SetValue(new Vector3(1f, 1f, 1f));
-                MasterMRT.Parameters["AmbientLightColor"].SetValue(new Vector3(0.98f, 0.9f, 1f));
-                MasterMRT.Parameters["AmbientLightIntensity"].SetValue(0.3f);
+                MasterMRT.CurrentTechnique = MRTCalculateIntegrateLightBlur;
+                MRTcolorMap.SetValue(ColorTarget);
+                MRTdirToCamMap.SetValue(DirToCamTarget);
+                MRTnormalMap.SetValue(NormalTarget);
+                MRTbloomFilter.SetValue(BloomFilterTarget);
+                MRTlightColor.SetValue(new Vector3(1f, 1f, 1f));
+                MRTambientLightColor.SetValue(new Vector3(0.98f, 0.9f, 1f));
+                MRTambientLightIntensity.SetValue(0.35f);
+                MRTscreenSize.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
 
-
+                
                 FullScreenQuad.Draw(MasterMRT);
-
-                GraphicsDevice.SetRenderTarget(SceneTarget);
-                MasterMRT.CurrentTechnique = MasterMRT.Techniques["IntegrateLight"];
-                MasterMRT.Parameters["LightMap"].SetValue(LightTarget);
-                FullScreenQuad.Draw(MasterMRT);
-
-                /* - Bloom - */
-
-                EffectBlur.CurrentTechnique = EffectBlur.Techniques["MRTtech"];
-                EPblurScreenSize.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-
-                /* use MRT to blur horizontally and vertically at the same time*/
-                GraphicsDevice.SetRenderTargets(BlurHRenderTarget, BlurVRenderTarget);
-                GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.Black, 1f, 0);
-
-                EPblurTexture.SetValue(BloomFilterTarget);
-
-                FullScreenQuad.Draw(EffectBlur);
-
+                
                 /* integrate */
                 GraphicsDevice.DepthStencilState = DepthStencilState.None;
                 GraphicsDevice.SetRenderTarget(null);
@@ -354,14 +369,21 @@ namespace TGC.MonoGame.TP
             
             Matrix world;
             
-            foreach (var mesh in t.Model.Meshes)
+            foreach (var mesh in t.SelectedModel.Meshes)
             {
                 world = mesh.ParentBone.Transform * t.SRT;
-                EPMRTcolor.SetValue(new Vector3(0.5f, 0.5f, 0.5f));
-                EPMRTworld.SetValue(world);
-                EPMRTworldViewProjection.SetValue(world * Game.SelectedCamera.View * Game.SelectedCamera.Projection);
-                //EPMRTlightViewProjection.SetValue(world * Game.LightCamera.View * Game.LightCamera.Projection);
-                EPMRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
+                //if(t.SelectedIndex == 0)
+                    MRTcolor.SetValue(new Vector3(0.5f, 0.5f, 0.5f));
+                //if (t.SelectedIndex == 1)
+                //    MRTcolor.SetValue(new Vector3(0.5f, 0f, 0f));
+                //if (t.SelectedIndex == 2)
+                //    MRTcolor.SetValue(new Vector3(0f, 0.5f, 0f));
+                //if (t.SelectedIndex == 3)
+                //    MRTcolor.SetValue(new Vector3(0f, 0f, 0.5f));
+
+                MRTworld.SetValue(world);
+                MRTworldViewProjection.SetValue(world * Game.SelectedCamera.View * Game.SelectedCamera.Projection);
+                MRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
                 mesh.Draw();
 
             }
@@ -370,11 +392,10 @@ namespace TGC.MonoGame.TP
                 foreach (var mesh in TrenchTurret.Meshes)
                 {
                     world = mesh.ParentBone.Transform * turret.SRT;
-                    EPMRTcolor.SetValue(new Vector3(0.5f, 0.5f, 0.5f));
-                    EPMRTworld.SetValue(world);
-                    EPMRTworldViewProjection.SetValue(world * Game.SelectedCamera.View * Game.SelectedCamera.Projection);
-                    //EPMRTlightViewProjection.SetValue(world * Game.LightCamera.View * Game.LightCamera.Projection);
-                    EPMRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
+                    MRTcolor.SetValue(new Vector3(0.5f, 0.5f, 0.5f));
+                    MRTworld.SetValue(world);
+                    MRTworldViewProjection.SetValue(world * Game.SelectedCamera.View * Game.SelectedCamera.Projection);
+                    MRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
                     mesh.Draw();
                 }
             }
@@ -392,12 +413,12 @@ namespace TGC.MonoGame.TP
                 var wvp = world * Game.SelectedCamera.View * Game.SelectedCamera.Projection;
                 //var itw = Matrix.Transpose(Matrix.Invert(xwing.World));
 
-                EPMRTtexture.SetValue(XwingTextures[meshCount]);
-                MasterMRT.Parameters["ModelNormal"].SetValue(XwingNormalTex[meshCount]);
-                EPMRTworld.SetValue(world);
-                EPMRTworldViewProjection.SetValue(wvp);
+                MRTtexture.SetValue(XwingTextures[meshCount]);
+                MRTmodelNormal.SetValue(XwingNormalTex[meshCount]);
+                MRTworld.SetValue(world);
+                MRTworldViewProjection.SetValue(wvp);
                 //EPMRTlightViewProjection.SetValue(world * Game.LightCamera.View * Game.LightCamera.Projection);
-                EPMRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
+                MRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
                 meshCount++;
 
                 mesh.Draw();
@@ -409,30 +430,30 @@ namespace TGC.MonoGame.TP
             
             int meshCount = 0;
             if (dt == DrawType.Regular)
-                MasterMRT.CurrentTechnique = ETMRTbasicColor; // remove for light post proc.
+                MasterMRT.CurrentTechnique = MRTbasicColor; // remove for light post proc.
             
-            MasterMRT.Parameters["ApplyLightEffect"]?.SetValue(0f);
-            EPMRTaddToBloomFilter.SetValue(1f);
-            DrawModelMRT(XwingEnginesModel, xwing.EnginesSRT, xwing.EnginesColor);
-            EPMRTaddToBloomFilter.SetValue(0f);
-            MasterMRT.Parameters["ApplyLightEffect"]?.SetValue(1f);
+            //MRTapplyLightEffect.SetValue(0f);
 
+            MRTaddToBloomFilter.SetValue(1f);
+            DrawModelMRT(XwingEnginesModel, xwing.EnginesSRT, xwing.EnginesColor);
+            MRTaddToBloomFilter.SetValue(0f);
+            
+            //MRTapplyLightEffect.SetValue(1f);
+            
             if (dt == DrawType.Regular)
-                MasterMRT.CurrentTechnique = ETMRTtextured;
+                MasterMRT.CurrentTechnique = MRTtextured;
 
             foreach (var mesh in XwingModel.Meshes)
             {
                 xwing.World = mesh.ParentBone.Transform * xwing.SRT;
 
                 var wvp = xwing.World * Game.SelectedCamera.View * Game.SelectedCamera.Projection;
-                //var itw = Matrix.Transpose(Matrix.Invert(xwing.World));
-
-                EPMRTtexture.SetValue(XwingTextures[meshCount]);
-                MasterMRT.Parameters["ModelNormal"].SetValue(XwingNormalTex[meshCount]);
-                EPMRTworld.SetValue(xwing.World);
-                EPMRTworldViewProjection.SetValue(wvp);
-                //EPMRTlightViewProjection.SetValue(xwing.World * Game.LightCamera.View * Game.LightCamera.Projection);
-                EPMRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(xwing.World)));
+                
+                MRTtexture.SetValue(XwingTextures[meshCount]);
+                MRTmodelNormal.SetValue(XwingNormalTex[meshCount]);
+                MRTworld.SetValue(xwing.World);
+                MRTworldViewProjection.SetValue(wvp);
+                MRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(xwing.World)));
                 meshCount++;
 
                 mesh.Draw();
@@ -442,35 +463,32 @@ namespace TGC.MonoGame.TP
         void DrawTieMRT(Ship tie)
         {
             Matrix world;
-            MasterMRT.Parameters["ModelNormal"].SetValue(TieNormalTex);
+            MRTmodelNormal.SetValue(TieNormalTex);
             foreach (var mesh in TieModel.Meshes)
             {
                 world = mesh.ParentBone.Transform * tie.SRT;
 
                 var wvp = world * Game.SelectedCamera.View * Game.SelectedCamera.Projection;
-                EPMRTworld.SetValue(world);
-                EPMRTtexture.SetValue(TieTexture);
-                EPMRTworldViewProjection.SetValue(wvp);
-                //EPMRTlightViewProjection.SetValue(world * Game.LightCamera.View * Game.LightCamera.Projection);
-                EPMRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
+                MRTworld.SetValue(world);
+                MRTtexture.SetValue(TieTexture);
+                MRTworldViewProjection.SetValue(wvp);
+                MRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
                 mesh.Draw();
             }
         }
         void DrawTieMRT(TieFighter tie)
         {
             Matrix world;
-            MasterMRT.Parameters["ModelNormal"].SetValue(TieNormalTex);
+            MRTmodelNormal.SetValue(TieNormalTex);
             foreach (var mesh in TieModel.Meshes)
             {
                 world = mesh.ParentBone.Transform * tie.SRT;
 
                 var wvp = world * Game.SelectedCamera.View * Game.SelectedCamera.Projection;
-                EPMRTworld.SetValue(world);
-                EPMRTtexture.SetValue(TieTexture);
-                EPMRTworldViewProjection.SetValue(wvp);
-                //EPMRTlightViewProjection.SetValue(world * Game.LightCamera.View * Game.LightCamera.Projection);
-                EPMRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
-                //EPlightInverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
+                MRTworld.SetValue(world);
+                MRTtexture.SetValue(TieTexture);
+                MRTworldViewProjection.SetValue(wvp);
+                MRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
                 mesh.Draw();
             }
         }
@@ -482,12 +500,10 @@ namespace TGC.MonoGame.TP
                 var world = mesh.ParentBone.Transform * SRT;
                 var wvp = world * Game.SelectedCamera.View * Game.SelectedCamera.Projection;
 
-                EPMRTworld.SetValue(world);
-                EPMRTcolor.SetValue(color);
-                //MasterMRT.Parameters["World"].SetValue(world);
-                //EPMRTlightViewProjection.SetValue(world * Game.LightCamera.View * Game.LightCamera.Projection);
-                EPMRTworldViewProjection.SetValue(wvp);
-                EPMRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
+                MRTworld.SetValue(world);
+                MRTcolor.SetValue(color);
+                MRTworldViewProjection.SetValue(wvp);
+                MRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
                 mesh.Draw();
             }
 
@@ -509,51 +525,95 @@ namespace TGC.MonoGame.TP
         }
 
         #region effectParameters
-        EffectParameter EPbloomWorldViewProjection;
         EffectParameter EPbloomTexture;
         EffectParameter EPbloomBlurHTexture;
         EffectParameter EPbloomBlurVTexture;
 
-        EffectParameter EPblurScreenSize;
-        EffectParameter EPblurTexture;
-
-        EffectParameter EPMRTworld;
-        EffectParameter EPMRTworldViewProjection;
-        EffectParameter EPMRTinverseTransposeWorld;
-        EffectParameter EPMRTaddToBloomFilter;
-        EffectParameter EPMRTcolor;
-        EffectParameter EPMRTtexture;
-        EffectParameter EPMRTlightViewProjection;
-
-        EffectTechnique ETMRTtextured;
-        EffectTechnique ETMRTbasicColor;
-        EffectTechnique ETMRTskybox;
-        EffectTechnique ETMRTshadowmap;
+        EffectParameter MRTworld;
+        EffectParameter MRTworldViewProjection;
+        EffectParameter MRTinverseTransposeWorld;
+        EffectParameter MRTaddToBloomFilter;
+        EffectParameter MRTcolor;
+        EffectParameter MRTtexture;
+        EffectParameter MRTlightViewProjection;
+        EffectParameter MRTcolorMap;
+        EffectParameter MRTdirToCamMap;
+        EffectParameter MRTnormalMap;
+        EffectParameter MRTmodelNormal;
+        EffectParameter MRTbloomFilter;
+        EffectParameter MRTlightColor;
+        EffectParameter MRTambientLightColor;
+        EffectParameter MRTambientLightIntensity;
+        EffectParameter MRTscreenSize;
+        EffectParameter MRTshadowMapTex;
+        EffectParameter MRTshadowMapSize;
+        EffectParameter MRTapplyLightEffect;
+        EffectParameter MRTinvertViewProjection;
+        EffectParameter MRTcameraPosition;
+        EffectParameter MRTlightDirection;
+        EffectParameter MRTspecularIntensity;
+        EffectParameter MRTspecularPower;
+        EffectParameter MRTskyboxTex;
+        
+        EffectTechnique MRTtextured;
+        EffectTechnique MRTbasicColor;
+        EffectTechnique MRTskybox;
+        EffectTechnique MRTshadowMap;
+        EffectTechnique MRTCalculateIntegrateLightBlur;
         void manageEffectParameters()
         {
-            MasterMRT.Parameters["SkyBoxTexture"].SetValue(skyBoxTexture);
             
-            EPbloomWorldViewProjection = EffectBloom.Parameters["WorldViewProjection"];
-            EPbloomTexture = EffectBloom.Parameters["baseTexture"];
-            EPbloomBlurHTexture = EffectBloom.Parameters["blurHTexture"];
-            EPbloomBlurVTexture = EffectBloom.Parameters["blurVTexture"];
+            
+            
+            EPbloomTexture =        EffectBloom.Parameters["baseTexture"];
+            EPbloomBlurHTexture =   EffectBloom.Parameters["blurHTexture"];
+            EPbloomBlurVTexture =   EffectBloom.Parameters["blurVTexture"];
 
-            EPblurTexture = EffectBlur.Parameters["baseTexture"];
-            EPblurScreenSize = EffectBlur.Parameters["screenSize"];
-           
-            EPMRTworld = MasterMRT.Parameters["World"];
-            EPMRTworldViewProjection = MasterMRT.Parameters["WorldViewProjection"];
-            EPMRTtexture = MasterMRT.Parameters["Texture"];
-            EPMRTaddToBloomFilter = MasterMRT.Parameters["AddToFilter"];
-            EPMRTcolor = MasterMRT.Parameters["Color"];
-            EPMRTlightViewProjection = MasterMRT.Parameters["LightViewProjection"];
-            EPMRTinverseTransposeWorld = MasterMRT.Parameters["InverseTransposeWorld"];
-            ETMRTbasicColor = MasterMRT.Techniques["BasicColorDraw"];
-            ETMRTtextured = MasterMRT.Techniques["TexturedDraw"];
-            ETMRTskybox = MasterMRT.Techniques["Skybox"];
-            ETMRTshadowmap = MasterMRT.Techniques["DepthPass"];
+            MRTworld =                  MasterMRT.Parameters["World"];
+            MRTworldViewProjection =    MasterMRT.Parameters["WorldViewProjection"];
+            MRTtexture =                MasterMRT.Parameters["Texture"];
+            MRTaddToBloomFilter =       MasterMRT.Parameters["AddToFilter"];
+            MRTcolor =                  MasterMRT.Parameters["Color"];
+            MRTlightViewProjection =    MasterMRT.Parameters["LightViewProjection"];
+            MRTinverseTransposeWorld =  MasterMRT.Parameters["InverseTransposeWorld"];
+            MRTcolorMap =               MasterMRT.Parameters["ColorMap"];
+            MRTdirToCamMap =            MasterMRT.Parameters["DirToCamMap"];
+            MRTnormalMap =              MasterMRT.Parameters["NormalMap"];
+            MRTmodelNormal =            MasterMRT.Parameters["ModelNormal"];
+            MRTapplyLightEffect =       MasterMRT.Parameters["ApplyLightEffect"];
+            MRTinvertViewProjection =   MasterMRT.Parameters["InvertViewProjection"];
+            MRTcameraPosition =         MasterMRT.Parameters["CameraPosition"];
+            MRTlightDirection =         MasterMRT.Parameters["LightDirection"];
+            MRTspecularIntensity =      MasterMRT.Parameters["SpecularIntensity"];
+            MRTspecularPower =          MasterMRT.Parameters["SpecularPower"];
+            MRTskyboxTex =              MasterMRT.Parameters["SkyBoxTexture"];
+            MRTbloomFilter =            MasterMRT.Parameters["BloomFilter"];
+            MRTlightColor =             MasterMRT.Parameters["LightColor"];
+            MRTambientLightColor =      MasterMRT.Parameters["AmbientLightColor"];
+            MRTambientLightIntensity =  MasterMRT.Parameters["AmbientLightIntensity"];
+            MRTscreenSize =             MasterMRT.Parameters["screenSize"];
+            MRTshadowMapTex =           MasterMRT.Parameters["ShadowMap"];
+            MRTshadowMapSize =          MasterMRT.Parameters["ShadowMapSize"];
 
+
+            MRTbasicColor =                 MasterMRT.Techniques["BasicColorDraw"];
+            MRTtextured =                   MasterMRT.Techniques["TexturedDraw"];
+            MRTskybox =                     MasterMRT.Techniques["Skybox"];
+            MRTshadowMap =                  MasterMRT.Techniques["DepthPass"];
+            MRTCalculateIntegrateLightBlur= MasterMRT.Techniques["CalcIntLightBlur"];
         }
         #endregion
+        public static Model[] GetModelsFromType(TrenchType type)
+        {
+            switch (type)
+            {
+                case TrenchType.Platform: return TrenchPlatform;
+                case TrenchType.Straight: return TrenchStraight;
+                case TrenchType.T: return TrenchT;
+                case TrenchType.Intersection: return TrenchIntersection;
+                case TrenchType.Elbow: return TrenchElbow;
+                default: return TrenchPlatform;
+            }
+        }
     }
 }
