@@ -69,6 +69,25 @@ namespace TGC.MonoGame.TP
 			Random r = new Random();
 			fireRate = (float)(0.001d + r.NextDouble() * 0.015d);
 		}
+		Vector3 fireError(Vector3 fd, ref Matrix laserRot)
+		{
+			Random r = new Random();
+
+			var ex = 0.05f * ((float)r.NextDouble() - 1);
+			var ey = 0.05f * ((float)r.NextDouble() - 1);
+			var ez = 0.05f * ((float)r.NextDouble() - 1);
+
+			var error = new Vector3(fd.X + ex, fd.Y + ey, fd.Z + ez);
+
+			var newFd = Vector3.Normalize(error);
+
+			var y = MathF.Atan2(newFd.X, newFd.Z);
+			var p = -MathF.Asin(newFd.Y);
+
+			laserRot = Matrix.CreateFromYawPitchRoll(y, p, 0f);
+
+			return newFd;
+		}
 		public void fireLaser()
 		{
 			//System.Diagnostics.Debug.WriteLine(Time + " " + betweenFire);
@@ -81,12 +100,15 @@ namespace TGC.MonoGame.TP
 			SoundManager.Play3DSoundAt(SoundManager.Effect.TurretLaser, Position);
 
 			betweenFire = 0;
-			Matrix rotation = Matrix.CreateFromYawPitchRoll(Yaw, Pitch, 0f);
+			Matrix rotation = Matrix.Identity;
+
+			var fd = fireError(FrontDirection, ref rotation);
+
 			Matrix SRT =
 				Matrix.CreateScale(new Vector3(0.07f, 0.07f, 0.4f)) *
 				rotation *
 				Matrix.CreateTranslation(Position);
-			Laser.EnemyLasers.Add(new Laser(Position, rotation, SRT, FrontDirection, new Vector3(0.8f, 0f, 0.8f)));
+			Laser.EnemyLasers.Add(new Laser(Position, rotation, SRT, fd, new Vector3(0.8f, 0f, 0.8f)));
 		}
 	}
 }

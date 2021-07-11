@@ -7,6 +7,10 @@
 #define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
+float Time;
+float ApplyShieldEffect;
+float3 ShieldColor;
+
 matrix World;
 matrix WorldViewProjection;
 matrix InverseTransposeWorld;
@@ -118,6 +122,7 @@ struct PSOMRT
 
 
 //float ApplyLightEffect;
+
 float3 OmniLightsPos[20];
 float3 OmniLightsColor[20];
 int OmniLightsCount;
@@ -179,7 +184,6 @@ float getShadow(VSODraw input, float3 normal)
     
     return 0.25 * step(shadowMapDepth, lightSpacePosition.z);
 }
-
 PSOMRT TexturedDrawPS(VSODraw input)
 {
     PSOMRT output = (PSOMRT) 0;
@@ -191,6 +195,11 @@ PSOMRT TexturedDrawPS(VSODraw input)
     float3 normal = normalize(mul(fromNormalMap, input.WorldToTangentSpace));
     output.Normal = float4(normal, 1);
  
+    
+    //if(ApplyShieldEffect == 1.0)
+    //    if (input.TextureCoordinates.x < ran.GetRandomFloat(0,1))    
+    //        texColor.rgb = ShieldColor.rgb;
+            
     output.Color = texColor - getShadow(input, normal);
     
     output.DirToCam = float4(0.5 * (input.DirToCamera + 1), 1); //
@@ -456,10 +465,10 @@ DLightPSO DLightPS(DLightVSO input) : COLOR0
     
     for (int i = 0; i < kernel_size; i++)
     {
-        float2 scaledTextureCoordinatesH = input.TexCoord+ float2(0, (float) (i - kernel_r) / screenSize.x);
+        float2 scaledTextureCoordinatesH = input.TexCoord + float2(0, (float) (i - kernel_r) / screenSize.x);
         float2 scaledTextureCoordinatesV = input.TexCoord + float2(0, (float) (i - kernel_r) / screenSize.y);
         hColor += tex2D(bloomFilterSampler, scaledTextureCoordinatesH) * Kernel[i];
-        vColor += tex2D(bloomFilterSampler, scaledTextureCoordinatesH) * Kernel[i];
+        vColor += tex2D(bloomFilterSampler, scaledTextureCoordinatesV) * Kernel[i];
     }
     
     output.BlurH = hColor;

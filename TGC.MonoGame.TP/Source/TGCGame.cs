@@ -179,6 +179,7 @@ namespace TGC.MonoGame.TP
         protected override void Update(GameTime gameTime)
         {
             float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Drawer.MasterMRT.Parameters["Time"]?.SetValue(elapsedTime);
 
             Input.ProcessInput();
 
@@ -310,10 +311,13 @@ namespace TGC.MonoGame.TP
                     Camera.PausedUpdate(elapsedTime, Xwing);
                     #endregion
                     break;
+
+                    
             }
 
             Gizmos.UpdateViewProjection(SelectedCamera.View, SelectedCamera.Projection);
-            
+            if (Xwing.Score >= 50)
+                ChangeGameStateTo(GmState.Victory);
             base.Update(gameTime);
         }
 

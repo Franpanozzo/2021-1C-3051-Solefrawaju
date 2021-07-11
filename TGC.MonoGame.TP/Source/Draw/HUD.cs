@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Content;
 using System.Diagnostics;
 namespace TGC.MonoGame.TP
 {
-    
+
     public class HUD
     {
         Texture2D[] Crosshairs;
@@ -24,8 +24,8 @@ namespace TGC.MonoGame.TP
 
         public SpriteFont SpriteFont;
         public SpriteFont BigFont;
-        
-        public List<Button> startScreenBtns= new List<Button>();
+
+        public List<Button> startScreenBtns = new List<Button>();
         public List<Button> optionsBtns = new List<Button>();
         public List<Button> pauseBtns = new List<Button>();
         public List<Button> endBtns = new List<Button>();
@@ -69,7 +69,7 @@ namespace TGC.MonoGame.TP
 
             HudEnergy = loadNumberedTextures("HUD/Energy/", 0, 10, 1);
             HPBar = loadNumberedTextures("HUD/Health/", 0, 100, 5);
-            
+
             BtnPlay = Content.Load<Texture2D>(ContentFolderTextures + "HUD/Buttons/Jugar");
             BtnContinue = Content.Load<Texture2D>(ContentFolderTextures + "HUD/Buttons/Continuar");
             BtnMenu = Content.Load<Texture2D>(ContentFolderTextures + "HUD/Buttons/Menu");
@@ -94,12 +94,12 @@ namespace TGC.MonoGame.TP
             GenerateMiniMap();
             Init();
         }
-        Texture2D getTextureFromBlock (Trench block)
+        Texture2D getTextureFromBlock(Trench block)
         {
-            switch(block.Type)
+            switch (block.Type)
             {
                 case TrenchType.Straight:
-                    switch(block.Rotation)
+                    switch (block.Rotation)
                     {
                         case 0: return mmStraight[0];
                         case 90: return mmStraight[1];
@@ -108,8 +108,8 @@ namespace TGC.MonoGame.TP
                     }
                     break;
                 case TrenchType.Elbow:
-                    return mmElbow[(int)(block.Rotation / 90)]; 
-                    
+                    return mmElbow[(int)(block.Rotation / 90)];
+
                 case TrenchType.T:
                     return mmT[(int)(block.Rotation / 90)];
                 case TrenchType.Intersection:
@@ -128,22 +128,22 @@ namespace TGC.MonoGame.TP
             var map = Game.Map;
 
             Vector2 pos;
-            for(int x = 0; x < mapSize; x++)
+            for (int x = 0; x < mapSize; x++)
             {
                 pos.X = x * 50;
                 for (int y = 0; y < mapSize; y++)
                 {
                     pos.Y = y * 50;
-                    Texture2D selected = getTextureFromBlock(map[x,y]);
+                    Texture2D selected = getTextureFromBlock(map[x, y]);
                     SpriteBatch.Draw(selected, pos, null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0);
                 }
             }
-            
+
             SpriteBatch.End();
 
             Game.Graphics.GraphicsDevice.SetRenderTarget(null);
 
-            MiniMap = (Texture2D) MiniMapTarget;
+            MiniMap = (Texture2D)MiniMapTarget;
             //SpriteBatch.Draw(mmStraight[0], pos, null, Color.White, rotation, rotationCenter, 1f, SpriteEffects.None, 0);
         }
         Vector2 CalculateMiniMapXwingPos()
@@ -176,12 +176,12 @@ namespace TGC.MonoGame.TP
             var len = viewSize;
 
             return new Rectangle(x, y, len, len);
-            
+
         }
         public void Init()
         {
             size = Game.GraphicsDevice.Viewport.Bounds.Size;
-            
+
             center = new Vector2(size.X / 2, size.Y / 2);
             btnCenter = new Point(size.X / 2 + 200, size.Y / 2 - 90);
             btnDelta = 150;
@@ -199,7 +199,7 @@ namespace TGC.MonoGame.TP
                 new Button(BtnType.Options, btnCenter, BtnOptions, btnScale));
             startScreenBtns.Add(
                 new Button(BtnType.Exit, btnCenter + new Point(0, btnDelta), BtnExit, btnScale));
-            
+
             pauseBtns.Add(
                 new Button(BtnType.Continue, btnCenter - new Point(0, btnDelta), BtnContinue, btnScale));
             pauseBtns.Add(
@@ -243,12 +243,14 @@ namespace TGC.MonoGame.TP
                 case TGCGame.GmState.Options:
 
                     SpriteBatch.DrawString(SpriteFont, "proximamente", center - new Vector2(size.X / 3, 0f), new Color(255f, 50f, 50f));
+                    foreach (Button btn in optionsBtns)
+                        SpriteBatch.Draw(btn.Image, btn.Position, null, Color.White, 0f, Vector2.Zero, btnScale, SpriteEffects.None, 0f);
 
                     break;
                 case TGCGame.GmState.Running:
                     #region running
                     //topleft
-                    
+
                     SpriteBatch.Draw(HPBar[Game.Xwing.GetHPIndex()], new Vector2(0, 20f), null, Color.White, 0f, Vector2.Zero, new Vector2(1f, 1f), SpriteEffects.None, 0f);
 
                     topMessage = "FPS " + Game.FPS;
@@ -259,6 +261,7 @@ namespace TGC.MonoGame.TP
 
                     SpriteBatch.DrawString(SpriteFont, topMessage, new Vector2(80, 45), Color.White);
 
+                    SpriteBatch.DrawString(SpriteFont, "score " + Game.Xwing.Score, new Vector2(size.X / 2 - 50, 50), Color.White);
                     //energy
                     SpriteBatch.Draw(HudEnergy[Game.Xwing.Energy], new Vector2(size.X - 300f, 20f), null, Color.White, 0f, Vector2.Zero, new Vector2(1f, 1f), SpriteEffects.None, 0f);
 
@@ -266,7 +269,7 @@ namespace TGC.MonoGame.TP
                     {
                         var pos = new Vector2(size.X / 2, size.Y / 2);
                         var fullMapScale = 0.5f;
-                        
+
                         SpriteBatch.Draw(MiniMap,
                             pos, null, Color.White, MathHelper.Pi, new Vector2(525, 525), fullMapScale, SpriteEffects.None, 0);
 
@@ -294,7 +297,7 @@ namespace TGC.MonoGame.TP
                         var offset = new Vector2(ViewRec.Width * 0.5f, ViewRec.Height * 0.5f);
                         SpriteBatch.Draw(MiniMap,
                             pos, ViewRec, Color.White, rotation, offset, 1f, SpriteEffects.None, 0);
-                        
+
                         var xwingpos = new Vector2(126, size.Y - 181);
                         SpriteBatch.Draw(Xwing,
                             xwingpos, null, Color.White, 0f, Vector2.Zero, 0.1f, SpriteEffects.None, 0);
@@ -309,10 +312,10 @@ namespace TGC.MonoGame.TP
                             SpriteBatch.Draw(Crosshairs[2], new Vector2(center.X - sz / 2, center.Y - sz / 2), null, Color.White, 0f, Vector2.Zero, new Vector2(scale, scale), SpriteEffects.None, 0f);
                         }
                     }
-                    
 
-                    
-                    
+
+
+
                     #endregion
                     break;
 
@@ -326,13 +329,14 @@ namespace TGC.MonoGame.TP
                     }
                     #endregion
                     break;
+               
                 case TGCGame.GmState.Victory:
                     foreach (Button btn in endBtns)
                         SpriteBatch.Draw(btn.Image, btn.Position, null, Color.White, 0f, Vector2.Zero, btnScale, SpriteEffects.None, 0f);
 
                     SpriteBatch.DrawString(SpriteFont, "victoria", center - new Vector2(size.X / 3, 0f), new Color(255f, 50f, 50f));
 
-            
+
                     break;
                 case TGCGame.GmState.Defeat:
                     foreach (Button btn in endBtns)
@@ -345,11 +349,22 @@ namespace TGC.MonoGame.TP
             SpriteBatch.End();
 
         }
+        bool ignoreInput = false;
         public void VerifyBtnClick(MouseState mState)
         {
-            if (!mState.LeftButton.Equals(ButtonState.Pressed))
-                return;
             
+
+            if (!mState.LeftButton.Equals(ButtonState.Pressed))
+            {
+                if (ignoreInput)
+                    ignoreInput = false;
+                
+                return;
+            }
+            if (ignoreInput)
+                return;
+
+            ignoreInput = true;
             List<Button> clicked;
             Rectangle mouse = new Rectangle(mState.Position, new Point(5,5));
             switch (Game.GameState)

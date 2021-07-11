@@ -52,7 +52,8 @@ namespace TGC.MonoGame.TP
             
                 chased = new Ship(chasedPos, frontDirection, !allyChasing);
                 chaser = new Ship(chaserPos, frontDirection, allyChasing, chased);
-            
+
+            chased.Pair = chaser;
             backgroundShips.Add(chaser);
             backgroundShips.Add(chased);
 
@@ -118,6 +119,7 @@ namespace TGC.MonoGame.TP
 
         bool Chasing;
         public bool ShouldBeDestroyed = false;
+        public bool destroyOffScreen = false;
         public bool Allied; 
         float betweenFire = 0;
         float fireRate = 1f;
@@ -170,14 +172,16 @@ namespace TGC.MonoGame.TP
                 BS = new BoundingSphere(pos, 10f);
             }
         }
-        
+        //int lc = 0;
+        bool destroyNow = false;
         public void Update(float elapsedTime)
         {
             Position += FrontDirection * elapsedTime * 150;
 
             age += elapsedTime * 60;
             betweenFire += fireRate * 30f * elapsedTime;
-            var frustum = TGCGame.Instance.BoundingFrustum;
+            var Game = TGCGame.Instance;
+            var frustum = Game.BoundingFrustum;
 
             if (Allied)
             {
@@ -185,11 +189,33 @@ namespace TGC.MonoGame.TP
                 BB.Max = Position + BBsize;
 
                 onScreen = frustum.Intersects(BB);
+                if (!onScreen)
+                    if (destroyOffScreen)
+                        destroyNow = true;
+
             }
             else
             {
                 BS.Center = Position;
                 onScreen = frustum.Intersects(BS);
+
+                if (!onScreen)
+                    if (destroyOffScreen)
+                        destroyNow = true;
+
+                var laser = Laser.AlliedLasers.Find(laser => laser.Hit(BS) && laser.fromPlayer);
+                if (laser != null)
+                {
+                    Laser.AlliedLasers.Remove(laser);
+                    
+                    Pair.destroyOffScreen = true;
+                    destroyNow = true;
+
+                    SoundManager.Play3DSoundAt(SoundManager.Effect.TieExplosion, Position);
+                    Game.Xwing.Score += 10;
+                }
+
+
             }
 
             Yaw = MathF.Atan2(FrontDirection.X, FrontDirection.Z);
@@ -208,18 +234,39 @@ namespace TGC.MonoGame.TP
 
             SRT = Scale * YPR * Matrix.CreateTranslation(Position);
 
-            
-            if (Chasing)
-            {
-                fireLaser();
+            if(destroyNow)
+                ShouldBeDestroyed = true;
+            else
+                if (Chasing)
+                {
+                    fireLaser();
 
-                ShouldBeDestroyed = 
-                    age >= maxAge &&
-                    !onScreen &&
-                    !Pair.onScreen;
+                    ShouldBeDestroyed = 
+                        age >= maxAge &&
+                        !onScreen &&
+                        !Pair.onScreen;
 
-                Pair.ShouldBeDestroyed = ShouldBeDestroyed;
-            }
+                    Pair.ShouldBeDestroyed = ShouldBeDestroyed;
+                }
+        }
+        Vector3 fireError(Vector3 fd, ref Matrix laserRot)
+        {
+            Random r = new Random();
+
+            var ex = 0.1f * ((float)r.NextDouble() - 1);
+            var ey = 0.1f * ((float)r.NextDouble() - 1);
+            var ez = 0.1f * ((float)r.NextDouble() - 1);
+
+            var error = new Vector3(fd.X + ex, fd.Y + ey, fd.Z + ez);
+
+            var newFd = Vector3.Normalize(error);
+
+            var y = MathF.Atan2(newFd.X, newFd.Z);
+            var p = -MathF.Asin(newFd.Y);
+
+            laserRot = Matrix.CreateFromYawPitchRoll(y, p, 0f);
+
+            return newFd;
         }
         void fireLaser()
         {
@@ -229,18 +276,22 @@ namespace TGC.MonoGame.TP
 
             Random r = new Random();
 
-            Matrix rotation = Matrix.CreateFromYawPitchRoll(Yaw, -Pitch, 0f);
+
+            fireRate = (float)(0.001d + r.NextDouble() * 0.05d);
+
+        
+            Matrix rotation = Matrix.Identity;
+            var frontDir = fireError(FrontDirection, ref rotation);
+            
             Matrix SRT =
                 Matrix.CreateScale(new Vector3(0.07f, 0.07f, 0.4f)) *
                 rotation *
                 Matrix.CreateTranslation(Position);
 
-
-            fireRate = (float)(0.001d + r.NextDouble() * 0.05d);
             if(Allied)
-                Laser.AlliedLasers.Add(new Laser(Position, rotation, SRT, FrontDirection, new Vector3(0f, 0.8f, 0f)));
+                Laser.AlliedLasers.Add(new Laser(Position, rotation, SRT, frontDir, new Vector3(0f, 0.8f, 0f)));
             else
-                Laser.EnemyLasers.Add(new Laser(Position, rotation, SRT, FrontDirection, new Vector3(0.8f, 0f, 0f)));
+                Laser.EnemyLasers.Add(new Laser(Position, rotation, SRT, frontDir, new Vector3(0.8f, 0f, 0f)));
 
         }
         

@@ -7,7 +7,7 @@ namespace TGC.MonoGame.TP
 {
     public class MyCamera : Camera
     {
-        bool debugging = false;
+        bool debugging = true;
 
         private readonly Point screenCenter;
         public bool MouseLookEnabled = true;

@@ -10,7 +10,7 @@ namespace TGC.MonoGame.TP
 	public class Xwing
 	{
 		public int HP { get; set; }
-		public bool damageEnabled = true;
+		public bool damageEnabled = false;
 		public int Score { get; set; }
 		public int Energy = 10;
 		public bool prevBoostState = false;
@@ -527,6 +527,7 @@ namespace TGC.MonoGame.TP
 		public float yawCorrection = 5f;
 		Vector3 laserFront;
 
+		
 		public void fireLaser()
 		{
 			//System.Diagnostics.Debug.WriteLine(Time + " " + betweenFire);
@@ -574,8 +575,9 @@ namespace TGC.MonoGame.TP
 			for (var i = 0; i < 4; i++)
 				laserSRT[i] = scale * YPR *  t[i];
 
-
-			Laser.AlliedLasers.Add(new Laser(newPos[LaserFired], YPR, laserSRT[LaserFired], FrontDirection, laserColor));
+			var laser = new Laser(newPos[LaserFired], YPR, laserSRT[LaserFired], FrontDirection, laserColor);
+			laser.fromPlayer = true;
+			Laser.AlliedLasers.Add(laser);
 
 			LaserFired++;
 			LaserFired %= 4;

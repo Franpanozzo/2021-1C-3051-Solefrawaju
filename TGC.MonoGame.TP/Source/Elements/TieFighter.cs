@@ -42,12 +42,55 @@ namespace TGC.MonoGame.TP
 		//	var cross = Vector3.Cross(a, b);
 		//	return MathF.Asin(cross.Length() / (a.Length() * b.Length()));
 		//}
-		
+
+		List<Vector3> prevFDs = new List<Vector3>();
+		int maxPFD = 10;
+
+		Vector3 followError(Vector3 fd)
+		{
+			Random r = new Random();
+
+			var ex = 0.27f * ((float)r.NextDouble() - 1);
+			r = new Random(); 
+			var ey = 0.27f* ((float)r.NextDouble() - 1);
+			r = new Random(); 
+			var ez = 0.27f * ((float)r.NextDouble() - 1);
+
+			var error = new Vector3(fd.X + ex, fd.Y + ey, fd.Z + ez);
+
+			var erroredFD = Vector3.Normalize(error);
+
+			if (prevFDs.Count < maxPFD)
+				prevFDs.Add(erroredFD);
+			else
+				prevFDs.RemoveAt(0);
+
+			
+			Vector3 newFd = Vector3.Zero;
+			float mul = 0.6f;
+
+			//TGCGame.MutexDeltas.WaitOne(); //deberia solucionar list modified exception
+			foreach (var pfd in prevFDs)
+			{
+				newFd.X += pfd.X * mul;
+				newFd.Y += pfd.Y * mul;
+				newFd.Z += pfd.Z * mul;
+				mul += 0.025f;
+			}
+			//TGCGame.MutexDeltas.ReleaseMutex();
+			newFd.X /= prevFDs.Count;
+			newFd.Y /= prevFDs.Count;
+			newFd.Z /= prevFDs.Count;
+			return newFd;
+		}
 		public void Update(Xwing xwing, float time)
 		{
 
 			Time = time;
-			FrontDirection = Vector3.Normalize(xwing.Position - Position);
+			
+			
+			FrontDirection = followError(Vector3.Normalize(xwing.Position - Position));
+
 			updateDirectionVectors();
 			if (Vector3.Distance(xwing.Position, Position) > 100)
 				Position += FrontDirection * 50f * time;
@@ -68,6 +111,7 @@ namespace TGC.MonoGame.TP
 			Random r = new Random();
 			fireRate = (float)(0.001d + r.NextDouble() * 0.05d);
 		}
+		
 		public void fireLaser()
 		{
 			//System.Diagnostics.Debug.WriteLine(Time + " " + betweenFire);
@@ -78,9 +122,9 @@ namespace TGC.MonoGame.TP
 			randomFireRate();
 
 			var Game = TGCGame.Instance;
-            SoundManager.Play3DSoundAt(SoundManager.Effect.Laser, Position);
-            //SoundManager.Play3DSound(Game.soundLaser, Position);
-            Matrix rotation = Matrix.CreateFromYawPitchRoll(Yaw, Pitch, 0f);
+			SoundManager.Play3DSoundAt(SoundManager.Effect.Laser, Position);
+			//SoundManager.Play3DSound(Game.soundLaser, Position);
+			Matrix rotation = Matrix.CreateFromYawPitchRoll(Yaw, Pitch, 0f);
 			Matrix SRT =
 				Matrix.CreateScale(new Vector3(0.07f, 0.07f, 0.4f)) *
 				rotation *
@@ -107,11 +151,12 @@ namespace TGC.MonoGame.TP
 
 		public static void GenerateEnemies(Xwing xwing)
 		{
-			Random rnd = new Random();
+			Random rnd;
 			int maxEnemies = 2;
 			int distance = 300;
 			for (int i = 0; i < maxEnemies - Enemies.Count; i++)
 			{
+				rnd = new Random();
 				Vector3 random = new Vector3(rnd.Next(-distance, distance), 0f, rnd.Next(-distance, distance));
 				Vector3 pos = xwing.Position + random;
 				Vector3 dir = Vector3.Normalize(xwing.Position - pos);

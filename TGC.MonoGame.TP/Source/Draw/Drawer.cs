@@ -463,6 +463,9 @@ namespace TGC.MonoGame.TP
         void DrawTieMRT(Ship tie)
         {
             Matrix world;
+            //MasterMRT.Parameters["ApplyShieldEffect"]?.SetValue(1f);
+            //MasterMRT.Parameters["ShieldColor"]?.SetValue(new Vector3(0.8f, 0f, 0f));
+
             MRTmodelNormal.SetValue(TieNormalTex);
             foreach (var mesh in TieModel.Meshes)
             {
@@ -475,6 +478,7 @@ namespace TGC.MonoGame.TP
                 MRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
                 mesh.Draw();
             }
+            //MasterMRT.Parameters["ApplyShieldEffect"]?.SetValue(0f);
         }
         void DrawTieMRT(TieFighter tie)
         {
