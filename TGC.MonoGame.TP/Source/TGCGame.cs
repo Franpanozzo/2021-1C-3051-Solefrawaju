@@ -132,6 +132,7 @@ namespace TGC.MonoGame.TP
         public float kd = 0.8f;
         public float ks = 0.4f;
 
+        
         protected override void LoadContent()
         {
             Drawer.Init();
@@ -154,7 +155,7 @@ namespace TGC.MonoGame.TP
             Xwing.MapSize = MapSize;
             Xwing.Update(0f, Camera);
 
-            LightCamera = new LightCamera(Camera.AspectRatio, Xwing.Position - Vector3.Left * 150 + Vector3.Up * 86);
+            LightCamera = new LightCamera(Camera.AspectRatio, Xwing.Position - Vector3.Left * 300 + Vector3.Up * (300 * MathF.Tan(MathHelper.ToRadians(30))));
             //Debug.WriteLine(LightCamera.Projection.ToString());
 
             LightCamera.BuildProjection(LightCamera.AspectRatio, 50f, 3000f, LightCamera.DefaultFieldOfViewDegrees);
@@ -176,6 +177,9 @@ namespace TGC.MonoGame.TP
         public float RadMin = 1f;
         public float RadMax = 30f;
 
+        public float shadowNear = 5f;
+        public float shadowFar = 600f;
+        public float lightPosOffset = 200f;
         protected override void Update(GameTime gameTime)
         {
             float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -193,11 +197,28 @@ namespace TGC.MonoGame.TP
                 center += corner;
 
             center /= frustumCorners.Length;
+            //var cyr = MathHelper.ToRadians(Camera.Yaw);
 
-            LightCamera.FrustumCenter = Xwing.Position;
+            
+            float dif = - MathF.Atan2(Camera.FrontDirection.X - 1f, Camera.FrontDirection.Z - 0f);
+
+            if (dif > MathHelper.PiOver2)
+                dif = MathHelper.Pi - dif;
+
+            // [0 - 90]
+            // [700- 200]
+
+            LightCamera.Offset = 200f;
+            //LightCamera.Offset = MathHelper.Lerp(200, 700, 1f - (dif / MathHelper.PiOver2)); 
+            //Debug.WriteLine(" dif "+ MathHelper.ToDegrees(dif) + " off " + LightCamera.Offset);
+
+            //LightCamera.NearPlane = shadowNear;
+            //LightCamera.FarPlane = shadowFar;
+
+            //LightCamera.FrustumCenter = new Vector3(center.X, 0f, center.Z);
             LightCamera.Update(gameTime);
             
-            Vector4 zone = Vector4.One;
+            Vector4 zone = Xwing.GetZone();
 
             switch (GameState)
             {
@@ -239,8 +260,7 @@ namespace TGC.MonoGame.TP
 
 
                     Trench.UpdateCurrent();
-                    zone = Xwing.GetZone();
-
+                    
                     //enemyLasers.Clear();
 
                     for (int x = (int)zone.X; x < zone.Y; x++)
@@ -290,9 +310,8 @@ namespace TGC.MonoGame.TP
 
                     Drawer.trenchesToDraw.Clear();
                     
-                    Vector4 xzone = Xwing.GetZone();
-                    for (int x = (int)xzone.X; x < xzone.Y; x++)
-                        for (int z = (int)xzone.Z; z < xzone.W; z++)
+                    for (int x = (int)zone.X; x < zone.Y; x++)
+                        for (int z = (int)zone.Z; z < zone.W; z++)
                         {
                             var block = Map[x, z];
                            
@@ -309,6 +328,17 @@ namespace TGC.MonoGame.TP
                 case GmState.Defeat:
                     #region defeat
                     Camera.PausedUpdate(elapsedTime, Xwing);
+
+                    Drawer.trenchesToDraw.Clear();
+
+                    for (int x = (int)zone.X; x < zone.Y; x++)
+                        for (int z = (int)zone.Z; z < zone.W; z++)
+                        {
+                            var block = Map[x, z];
+
+                            if (BoundingFrustum.Intersects(block.BB))
+                                Drawer.trenchesToDraw.Add(Map[x, z]);
+                        }
                     #endregion
                     break;
 

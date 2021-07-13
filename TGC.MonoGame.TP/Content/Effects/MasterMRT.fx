@@ -465,7 +465,7 @@ DLightPSO DLightPS(DLightVSO input) : COLOR0
     
     for (int i = 0; i < kernel_size; i++)
     {
-        float2 scaledTextureCoordinatesH = input.TexCoord + float2(0, (float) (i - kernel_r) / screenSize.x);
+        float2 scaledTextureCoordinatesH = input.TexCoord + float2((float) (i - kernel_r) / screenSize.x, 0);
         float2 scaledTextureCoordinatesV = input.TexCoord + float2(0, (float) (i - kernel_r) / screenSize.y);
         hColor += tex2D(bloomFilterSampler, scaledTextureCoordinatesH) * Kernel[i];
         vColor += tex2D(bloomFilterSampler, scaledTextureCoordinatesV) * Kernel[i];

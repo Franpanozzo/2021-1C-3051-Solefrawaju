@@ -84,8 +84,8 @@ namespace TGC.MonoGame.TP
             }
             //Game.ShowShadowMap = kState.IsKeyDown(Keys.O);
 
-            //if (kState.IsKeyDown(Keys.D1))
-            //    Game.Drawer.ShowTarget = 1;
+            if (kState.IsKeyDown(Keys.D1))
+                Game.Drawer.ShowTarget = 1;
             else if (kState.IsKeyDown(Keys.D2))
                 Game.Drawer.ShowTarget = 2;
             else if (kState.IsKeyDown(Keys.D3))
@@ -98,6 +98,8 @@ namespace TGC.MonoGame.TP
                 Game.Drawer.ShowTarget = 6;
             else if (kState.IsKeyDown(Keys.D7))
                 Game.Drawer.ShowTarget = 7;
+            else if (kState.IsKeyDown(Keys.D8))
+                Game.Drawer.ShowTarget = 8;
             else
                 Game.Drawer.ShowTarget = 0;
 
@@ -209,9 +211,9 @@ namespace TGC.MonoGame.TP
                     var deltaZ = 0f;
                     var update = false;
                     if (kState.IsKeyDown(Keys.N))
-                        inputDelta = 0.005f;
+                        inputDelta = 5f;
                     else
-                        inputDelta = 0.00005f;
+                        inputDelta = 10f;
                     if (kState.IsKeyDown(Keys.I))
                     {
                         deltaZ = inputDelta;
@@ -256,10 +258,11 @@ namespace TGC.MonoGame.TP
                     if (update)
                     {
                         
-                        Game.Drawer.modEpsilon += deltaX;
-                        Game.Drawer.maxEpsilon += deltaZ;
+                        Game.shadowFar += deltaX;
+                        Game.shadowNear += deltaZ;
+                        Game.lightPosOffset += deltaY;
 
-                        Debug.WriteLine("mod " + Game.Drawer.modEpsilon + "max" + Game.Drawer.maxEpsilon);
+                        Debug.WriteLine("off " + Game.lightPosOffset+ " n " + Game.shadowNear+ " f " + Game.shadowFar);
 
                     }
 

@@ -10,7 +10,7 @@ namespace TGC.MonoGame.TP
 	public class Xwing
 	{
 		public int HP { get; set; }
-		public bool damageEnabled = false;
+		public bool damageEnabled = true;
 		public int Score { get; set; }
 		public int Energy = 10;
 		public bool prevBoostState = false;

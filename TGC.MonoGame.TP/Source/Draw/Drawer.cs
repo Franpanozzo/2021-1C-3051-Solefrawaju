@@ -104,22 +104,11 @@ namespace TGC.MonoGame.TP
 
 
             TrenchPlatform = loadNumberedModels("Trench/Platform/", 0, 3, 1);
-            TrenchStraight = loadNumberedModels("Trench/Straight/", 0, 3, 1);
-            //TrenchT = loadNumberedModels("Trench/T/", 0, 3, 1);
-            //TrenchElbow = loadNumberedModels("Trench/Elbow/", 0, 3, 1);
-            //TrenchIntersection = loadNumberedModels("Trench/Intersection/", 0, 3, 1);
+            TrenchStraight = loadNumberedModels("Trench/Straight/", 0, 1, 1);
+            TrenchT = loadNumberedModels("Trench/T/", 0, 1, 1);
+            TrenchElbow = loadNumberedModels("Trench/Elbow/", 0, 1, 1);
+            TrenchIntersection = loadNumberedModels("Trench/Intersection/", 0, 1, 1);
 
-            //TrenchPlatform = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/Trench-Platform-Block") };
-            //TrenchStraight = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/Trench-Straight-Block") };
-            TrenchT = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/T/0") };
-            TrenchElbow = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/Elbow/0") };
-            TrenchIntersection = new Model[] { Content.Load<Model>(ContentFolder3D + "Trench/Intersection/0") };
-
-            //TrenchPlatform = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Platform-Block");
-            //TrenchStraight = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Straight-Block");
-            //TrenchT = Content.Load<Model>(ContentFolder3D + "Trench/Trench-T-Block");
-            //TrenchElbow = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Elbow-Block");
-            //TrenchIntersection = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Intersection");
             TrenchTurret = Content.Load<Model>(ContentFolder3D + "Trench/Trench-Turret");
 
             //Trench2 = Content.Load<Model>(ContentFolder3D + "Trench2/Trench");
@@ -326,28 +315,28 @@ namespace TGC.MonoGame.TP
                     SpriteBatch.End();
                 }
             }
-            else if (ShowTarget >= 2)
+            else if (ShowTarget >= 1)
             {
 
                 GraphicsDevice.SetRenderTarget(null);
 
                 SpriteBatch.Begin();
 
-                if (ShowTarget == 2)
+                if (ShowTarget == 1)
                     SpriteBatch.Draw(ColorTarget, Vector2.Zero, Color.White);
-                else if (ShowTarget == 3)
+                else if (ShowTarget == 2)
                     SpriteBatch.Draw(NormalTarget, Vector2.Zero, Color.White);
-                else if (ShowTarget == 4)
+                else if (ShowTarget == 3)
                     SpriteBatch.Draw(LightTarget, Vector2.Zero, Color.White);
-                else if (ShowTarget == 5)
+                else if (ShowTarget == 4)
                     SpriteBatch.Draw(BloomFilterTarget, Vector2.Zero, Color.White);
-                else if (ShowTarget == 6)
+                else if (ShowTarget == 5)
                     SpriteBatch.Draw(DirToCamTarget, Vector2.Zero, Color.White);
-
-                //else if (ShowTarget == 6)
-                //    SpriteBatch.Draw(DepthTarget,
-                //           Vector2.Zero, null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                else if (ShowTarget == 6)
+                    SpriteBatch.Draw(BlurHRenderTarget, Vector2.Zero, Color.White);
                 else if (ShowTarget == 7)
+                    SpriteBatch.Draw(BlurVRenderTarget, Vector2.Zero, Color.White);
+                else if (ShowTarget == 8)
                     SpriteBatch.Draw(ShadowMapRenderTarget,
                            Vector2.Zero, null, Color.White, 0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
 

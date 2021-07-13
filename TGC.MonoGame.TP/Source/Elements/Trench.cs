@@ -61,20 +61,9 @@ namespace TGC.MonoGame.TP
 			Turrets.ForEach(turret => turret.Update(xwing, elapsedTime));
 			Turrets.RemoveAll(turret => turret.needsRemoval);
 
-			if (Type == TrenchType.Platform || Type == TrenchType.Straight)
-			{
-				var distance = Vector3.Distance(xwing.Position, Position);
-				if (distance < 400)
-					SelectedIndex = 0;
-				else if (distance < 600)
-					SelectedIndex = 1;
-				else if (distance < 900)
-					SelectedIndex = 2;
-				else
-					SelectedIndex = 3;
-			}
-			else
-				SelectedIndex = 0;
+			var distance = Vector3.Distance(xwing.Position, Position);
+			 
+			SelectedIndex = distance < 400 ? 0 : 1;
 			
 			SelectedModel = Models[SelectedIndex];
 		}
