@@ -212,6 +212,7 @@ namespace TGC.MonoGame.TP
                     destroyNow = true;
 
                     SoundManager.Play3DSoundAt(SoundManager.Effect.TieExplosion, Position);
+                    TGCGame.Instance.HUD.ExplosionAnims.Add(new ExplosionAnim(Position));
                     Game.Xwing.Score += 10;
                 }
 

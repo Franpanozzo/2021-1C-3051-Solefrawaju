@@ -192,6 +192,7 @@ namespace TGC.MonoGame.TP
         {
 			SoundManager.Play3DSoundAt(SoundManager.Effect.TieExplosion, pos);
 			//explosion effect
+			TGCGame.Instance.HUD.ExplosionAnims.Add(new ExplosionAnim(pos));
 			xwing.Score += 10;
 		}
 	}

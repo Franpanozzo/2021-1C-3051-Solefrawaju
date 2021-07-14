@@ -174,6 +174,10 @@ float getShadow(VSODraw input, float3 normal)
     float2 shadowMapTextureCoordinates = 0.5 * lightSpacePosition.xy + float2(0.5, 0.5);
     shadowMapTextureCoordinates.y = 1.0f - shadowMapTextureCoordinates.y;
 	
+    if (shadowMapTextureCoordinates.x < 0.0 || shadowMapTextureCoordinates.x > 1.0
+        || shadowMapTextureCoordinates.y < 0.0 || shadowMapTextureCoordinates.y > 1.0)
+        return -1.0;
+    
     float inclinationBias = max(modulatedEpsilon * (1.0 - dot(normal, LightDirection)), maxEpsilon);
 	
     float shadowMapDepth = 1 - tex2D(shadowSampler, shadowMapTextureCoordinates).r + inclinationBias;
@@ -200,7 +204,12 @@ PSOMRT TexturedDrawPS(VSODraw input)
     //    if (input.TextureCoordinates.x < ran.GetRandomFloat(0,1))    
     //        texColor.rgb = ShieldColor.rgb;
             
-    output.Color = texColor - getShadow(input, normal);
+    
+    output.Color = texColor;
+    float shadowFilter = getShadow(input, normal);
+    
+    if (shadowFilter >= 0)
+        output.Color -= shadowFilter;
     
     output.DirToCam = float4(0.5 * (input.DirToCamera + 1), 1); //
     
@@ -228,7 +237,9 @@ PSOMRT TrenchPS(VSODraw input)
     else
         output.Color = float4(Color, 1);
     
-    output.Color -= getShadow(input, worldNormal);
+    float shadowFilter = getShadow(input, worldNormal);
+    if(shadowFilter >= 0)
+        output.Color -= shadowFilter;
     
     output.Bloom = float4(0,0,0, 1);
     
@@ -286,7 +297,7 @@ PSOMRT SkyboxPS(VSOsky input)
     
     output.Color = float4(texCUBE(SkyBoxSampler, normalize(input.TextureCoordinates)).rgb, 1);
     output.Bloom = float4(0, 0, 0, 0.0);
-    output.DirToCam = float4(1, 0, 1, 0);
+    output.DirToCam = float4(0, 0, 0, 0);
     output.Normal= float4(0, 0, 1, 0);
     
     return output;

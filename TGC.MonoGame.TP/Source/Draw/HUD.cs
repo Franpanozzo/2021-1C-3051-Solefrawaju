@@ -22,6 +22,8 @@ namespace TGC.MonoGame.TP
         Texture2D BtnPlay, BtnContinue, BtnMenu, BtnExit, BtnOptions;
         Texture2D Xwing;
 
+        Texture2D tieExplosionAnim;
+
         public SpriteFont SpriteFont;
         public SpriteFont BigFont;
 
@@ -35,7 +37,7 @@ namespace TGC.MonoGame.TP
 
         TGCGame Game;
         Point size;
-        Vector2 center;
+        public Vector2 center;
         Point btnCenter;
         int btnDelta;
         Vector2 btnScale;
@@ -43,6 +45,8 @@ namespace TGC.MonoGame.TP
         ContentManager Content;
         String ContentFolderTextures, ContentFolderSpriteFonts;
         Texture2D MiniMap;
+
+        public List<ExplosionAnim> ExplosionAnims = new List<ExplosionAnim>();
         public HUD(TGCGame instance)
         {
             Game = instance;
@@ -91,6 +95,8 @@ namespace TGC.MonoGame.TP
             mmPlatform = Content.Load<Texture2D>(ContentFolderTextures + "HUD/MiniMap/platform");
             Xwing = Content.Load<Texture2D>(ContentFolderTextures + "HUD/MiniMap/xwing");
             SpriteFont = Content.Load<SpriteFont>(ContentFolderSpriteFonts + "Starjedi");
+
+            tieExplosionAnim = Content.Load<Texture2D>(ContentFolderTextures + "HUD/Explosion/tie");
             GenerateMiniMap();
             Init();
         }
@@ -259,6 +265,7 @@ namespace TGC.MonoGame.TP
                     //    " Light " + Game.IntVector3ToStr(Game.LightCamera.Position);
 
 
+                    if(ExplosionAnims.Count == 0)
                     SpriteBatch.DrawString(SpriteFont, topMessage, new Vector2(80, 45), Color.White);
 
                     SpriteBatch.DrawString(SpriteFont, "score " + Game.Xwing.Score, new Vector2(size.X / 2 - 50, 50), Color.White);
@@ -311,6 +318,16 @@ namespace TGC.MonoGame.TP
                             var sz = 300 * scale;
                             SpriteBatch.Draw(Crosshairs[2], new Vector2(center.X - sz / 2, center.Y - sz / 2), null, Color.White, 0f, Vector2.Zero, new Vector2(scale, scale), SpriteEffects.None, 0f);
                         }
+
+                        //Exp anim
+
+                        foreach(var anim in ExplosionAnims)
+                        {
+                            SpriteBatch.Draw(tieExplosionAnim, anim.getPos(), anim.getViewRec(), Color.White, 0f, Vector2.Zero, anim.getScale(), SpriteEffects.None, 0);
+                        }
+                        ExplosionAnims.RemoveAll(anim => anim.Completed);
+                        
+
                     }
 
 
@@ -469,5 +486,73 @@ namespace TGC.MonoGame.TP
         VolFX,
         VolMusic,
         Exit
+    }
+    
+    public class ExplosionAnim
+    {
+        int animFrame, x, y;
+        int sectorSize = 512;
+
+        float scale;
+        float size;
+        Vector2 center;
+
+        Vector3 rawPos;
+        TGCGame Game;
+        public bool Completed;
+        public ExplosionAnim(Vector3 position)
+        {
+            Game = TGCGame.Instance;
+            rawPos = position;
+            //var scl = MathHelper.Lerp(0f, 1f, 1 - (Vector3.Distance(position, Game.Xwing.Position) / 500));
+            var scl = 1f;
+            size = sectorSize * scl;
+            scale = scl;
+            center = Game.HUD.center;
+        }
+        public Vector2 getPos()
+        {
+            //replace with matrix calc
+
+            var wvp = Vector3.Transform(rawPos, Game.SelectedCamera.View * Game.SelectedCamera.Projection);
+            //Debug.WriteLine(Game.Vector3ToStr(wvp, 2));
+
+            var screen = Game.GraphicsDevice.Viewport.Bounds.Size;
+
+
+            var vx = (wvp.X + 500) / 1000;
+            var vy = (wvp.Y + 500) / 1000;
+            var vz = wvp.Z / 500;
+
+            var x = MathHelper.Lerp(0, screen.X, vx);
+            var y = MathHelper.Lerp(0, screen.Y, 1 - vy);
+            size = MathHelper.Clamp(MathHelper.Lerp(10, sectorSize, 1 - vz),26,512);
+            scale = size / sectorSize ;
+            //Debug.WriteLine(vx + "," + vy +" "+x+","+y);
+            Debug.WriteLine(wvp.Z +","+size);
+            return new Vector2(x - size/2, y - size / 2);
+            //Debug.WriteLine("w " + world + " cst " + Game.Vector3ToStr(ics.Translation));
+            //Debug.WriteLine(Game.Vector2ToStr(new Vector2(ics.M11, ics.M12)) + "  "+ Game.Vector2ToStr(new Vector2(ics.M11, ics.M21)));
+            //return new Vector2(center.X - size / 2, center.Y - size / 2);
+        }
+        public Rectangle getViewRec()
+        {
+            x = (animFrame % 8) * sectorSize;
+            y = (animFrame / 8) * sectorSize;
+
+            //skip a few
+            if (animFrame == 10)
+                animFrame += 22;
+
+            animFrame ++;
+            
+            Completed = animFrame >= 64;
+            return new Rectangle(x, y, sectorSize, sectorSize);
+        }
+        public Vector2 getScale()
+        {
+            return new Vector2(scale, scale);
+        }
+        
     }
 }

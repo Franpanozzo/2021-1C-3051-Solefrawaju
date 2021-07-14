@@ -139,6 +139,17 @@ namespace TGC.MonoGame.TP
 
                     Game.SelectedCamera = kState.IsKeyDown(Keys.B) ? Game.LookBack : Game.Camera;
 
+                    //Game.HUD.showExplosion = kState.IsKeyDown(Keys.Z); 
+                    if (kState.IsKeyDown(Keys.Z))
+                    {
+                        if (!ignoredKeys.Contains(Keys.Z))
+                        {
+                            ignoredKeys.Add(Keys.Z);
+
+                            Game.HUD.ExplosionAnims.Add(new ExplosionAnim(Game.Xwing.Position + Game.Xwing.FrontDirection * 80 + Game.Xwing.RightDirection * 40));
+                        }
+                    }
+
                     Game.HUD.ShowFullMap = kState.IsKeyDown(Keys.CapsLock);
                     //if (kState.IsKeyDown(Keys.B))
                     //    Game.SelectedCamera = Game.LookBack;
@@ -151,7 +162,7 @@ namespace TGC.MonoGame.TP
                             ignoredKeys.Add(Keys.Escape);
 
                             Game.ChangeGameStateTo(TGCGame.GmState.Paused);
-
+                            
                             //Game.GameState = TGCGame.GmState.Paused;
                             //Game.Camera.SaveCurrentState();
                             ////Game.Camera.= MathHelper.ToRadians(Game.Camera.Yaw) + MathHelper.Pi;

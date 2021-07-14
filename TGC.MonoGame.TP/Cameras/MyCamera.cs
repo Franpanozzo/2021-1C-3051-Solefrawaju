@@ -86,7 +86,7 @@ namespace TGC.MonoGame.TP
             UpdateCameraVectors();
             CalculateView();
 
-            lookBackCamera.Position = Position + FrontDirection * 80;
+            lookBackCamera.Position = Position + FrontDirection * 100;
             lookBackCamera.FrontDirection = -FrontDirection;
             lookBackCamera.CalculateView();
 

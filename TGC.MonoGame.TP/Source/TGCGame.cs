@@ -126,6 +126,7 @@ namespace TGC.MonoGame.TP
             
             Window.Title = "Star Wars: Trench Run";
             Window.IsBorderless = true;
+            
         }
 
 
@@ -150,7 +151,7 @@ namespace TGC.MonoGame.TP
             Camera.MapLimit = MapLimit;
             Camera.MapSize = MapSize;
             Camera.BlockSize = blockSize;
-            Camera.Position = new Vector3(MapLimit/2 - blockSize/2, 70, blockSize /2);
+            Camera.Position = new Vector3(MapLimit/2 - blockSize/2, 150f, blockSize /2);
             Xwing.MapLimit = MapLimit;
             Xwing.MapSize = MapSize;
             Xwing.Update(0f, Camera);
@@ -346,7 +347,7 @@ namespace TGC.MonoGame.TP
             }
 
             Gizmos.UpdateViewProjection(SelectedCamera.View, SelectedCamera.Projection);
-            if (Xwing.Score >= 50)
+            if (Xwing.Score >= 100)
                 ChangeGameStateTo(GmState.Victory);
             base.Update(gameTime);
         }
@@ -396,6 +397,7 @@ namespace TGC.MonoGame.TP
                 case GmState.Running:
                     if (newState.Equals(GmState.Paused))
                     {
+                        SelectedCamera = Camera;
                         Camera.SaveCurrentState();
                         IsMouseVisible = true;
                     }
@@ -422,6 +424,15 @@ namespace TGC.MonoGame.TP
         public String Vector3ToStr(Vector3 v)
         {
             return "(" + v.X + " " + v.Y + " " + v.Z + ")";
+        }
+        public String Vector3ToStr(Vector3 v, int val)
+        {
+            var mul = Math.Pow(10, val);
+            var vX = Math.Floor(v.X * mul) / mul;
+            var vY = Math.Floor(v.Y * mul) / mul;
+            var vZ = Math.Floor(v.Z * mul) / mul;
+
+            return "(" + vX + " " + vY + " " + vZ + ")";
         }
         public String IntVector3ToStr(Vector3 v)
         {
