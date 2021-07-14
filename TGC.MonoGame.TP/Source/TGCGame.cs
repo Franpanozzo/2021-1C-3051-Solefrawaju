@@ -287,6 +287,7 @@ namespace TGC.MonoGame.TP
                     Xwing.VerifyCollisions(Laser.EnemyLasers, Map);
                     
                     TieFighter.UpdateEnemies(elapsedTime, Xwing);
+
                     
                     SoundManager.UpdateRandomDistantSounds(elapsedTime);
                     #endregion
