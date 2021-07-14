@@ -32,7 +32,7 @@ Los recursos usados se almacenan utilizando [Git LFS](https://git-lfs.github.com
 
 ## Integrantes
 Osuna, Leandro
-![IMG_20210714_175101](https://user-images.githubusercontent.com/62636307/125691216-d0d3d119-6291-45c9-998f-28b3d69e82a1.jpg)
+![IMG_20210714_175101](https://user-images.githubusercontent.com/62636307/125691216-d0d3d119-6291-45c9-998f-28b3d69e82a1.jpg | width = 500)
 
 ## Capturas
 ![GP1](https://user-images.githubusercontent.com/62636307/125690477-f66238f3-943f-4582-b929-bcfef9e74a53.png)
