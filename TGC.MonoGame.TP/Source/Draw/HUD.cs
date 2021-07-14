@@ -364,10 +364,6 @@ namespace TGC.MonoGame.TP
                     break;
             }
             SpriteBatch.End();
-            if(ShowFullMap)
-            {
-                ShowFullMap = ShowFullMap;
-            }
         }
         bool ignoreInput = false;
         public void VerifyBtnClick(MouseState mState)
