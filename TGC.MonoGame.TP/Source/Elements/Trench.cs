@@ -116,6 +116,13 @@ namespace TGC.MonoGame.TP
 			res %= 360;
 			return res;
 		}
+		static float OppositeFromAngle(float ang)
+        {
+			float res = ang + 180;
+			res %= 360;
+			return res;
+        }
+
 		static List<Vector3> GenLine(ref Trench[,] map, int xi, int yi, float rotation, int size)
         {
             int deltaX = 0;
@@ -130,8 +137,8 @@ namespace TGC.MonoGame.TP
             {
 				case 0f:   deltaY = 1;  deltaX = 0; steps = size - yi-1;	break;
 				case 90f:  deltaX = 1;  deltaY = 0; steps = size - xi-1;	break;
-				case 180f: deltaY = -1; deltaX = 0; steps = yi;			break;
-				case 270f: deltaX = -1; deltaY = 0; steps = xi;			break;
+				case 180f: deltaY = -1; deltaX = 0; steps = yi;				break;
+				case 270f: deltaX = -1; deltaY = 0; steps = xi;				break;
 			}
 			int prevX, prevY;
 			for (int step = 0 ; step < steps; step++)
@@ -142,21 +149,27 @@ namespace TGC.MonoGame.TP
 				y += deltaY;
 				//Si hay algo ahi, freno (reemplazo por T? )
 				
+				Trench prevBlock = map[prevX, prevY];
+				
 				if (map[x, y] != null)
 				{
 					switch(map[x, y].Type)
                     {
 						case TrenchType.Straight:
 							map[x, y] = new Trench(TrenchType.T, rotation);
-							Debug.WriteLine("set T (from ST) at (" + x + "," + y + ") rot " + rotation);
+							//Debug.WriteLine("set T (from ST) at (" + x + "," + y + ") rot " + rotation);
 							break;
 						case TrenchType.T:
 							map[x, y] = new Trench(TrenchType.Intersection, rotation);
-							Debug.WriteLine("set INT at (" + x + "," + y + ") rot " + rotation);
+							//Debug.WriteLine("set INT at (" + x + "," + y + ") rot " + rotation);
 							break;
-						case TrenchType.Elbow:
-							map[x, y] = new Trench(TrenchType.T, rotation);
-							Debug.WriteLine("set T (from E) at (" + x + "," + y + ") rot " + rotation);
+						case TrenchType.Elbow://check rotation when replacing
+
+							float elbowRot = map[x, y].Rotation;
+							Debug.WriteLine("set T (from E " + elbowRot + " at " + x + "," + y + " rot " + rotation + " prevR " + prevBlock.Rotation);
+							
+							//correctedRot = RightFromAngle(map[x, y].Rotation);
+							map[x, y] = new Trench(TrenchType.T, OppositeFromAngle(elbowRot));
 							break;
 
 					}
@@ -164,7 +177,17 @@ namespace TGC.MonoGame.TP
 				}
 
 				//Obtengo el siguiente bloque (adelante en el mapa)
-				Trench next = Trench.GetNextTrench(map[prevX, prevY], rotation);
+				Trench next = GetNextTrench(prevBlock, rotation);
+
+				var rotDelta = next.Rotation - prevBlock.Rotation;
+				var sameType = next.Type == prevBlock.Type;
+				
+				if (rotDelta != 0 && sameType && prevBlock.Type == TrenchType.Straight) //Rotacion incorrecta
+				{
+					Debug.WriteLine("fixing " + rotDelta + " at " + prevX + "," + prevY + " -> " + x + "," + y);
+
+					next = new Trench(TrenchType.Straight, prevBlock.Rotation);
+				}
 				map[x, y] = next;
 				//si es Interseccion o T, voy a tener dos direcciones en las que seguir dibujando (izq, der)
 				if (next.Type.Equals(TrenchType.Intersection) || next.Type.Equals(TrenchType.T))
@@ -193,6 +216,10 @@ namespace TGC.MonoGame.TP
 			return pointsOfInterest;
 
 		}
+		//static bool validateLine(List <Vector3> line)
+  //      {
+
+  //      }
 		static void recursiveGen(List<Vector3> points, ref Trench[,] map, int size)
         {
 			foreach (var point in points)
@@ -231,7 +258,7 @@ namespace TGC.MonoGame.TP
 			}
 			SetPlatforms(ref map, size, true);
 
-			System.Diagnostics.Debug.WriteLine("attemps: "+ attempt+" ws: " + whiteSpace);
+			System.Diagnostics.Debug.WriteLine("attempts: "+ attempt+" ws: " + whiteSpace);
 			return map;
 		}
 		static int SetPlatforms(ref Trench[,] map, int size, bool create)
@@ -257,13 +284,15 @@ namespace TGC.MonoGame.TP
 		{
 			String str = "MAP\n";
 			str += "  ";
-			for (int i = 0; i < size; i++)
-			{ 
+			for (int i = size - 1; i >= 0; i--)
+			{
 				str += i + " ";
+				if (i == 10)
+					str += " ";
 				if (i < 10)
 					str += " ";
-			}		
-			
+			}
+
 			str += "\n";
 			for (int y = size - 1; y >= 0; y--)
 			{
@@ -306,11 +335,11 @@ namespace TGC.MonoGame.TP
 								break;
 							case TrenchType.Elbow:
 								if (map[x, y].Rotation == 0)
-									str += "╔ ";
+									str += "╝ ";
 								else if (map[x, y].Rotation == 90)
 									str += "╗ ";
 								else if (map[x, y].Rotation == 180)
-									str += "╝ ";
+									str += "╔ ";
 								else if (map[x, y].Rotation == 270)
 									str += "╚ ";
 								break;
@@ -322,9 +351,12 @@ namespace TGC.MonoGame.TP
 			}
 
 			str += "  ";
-			for (int i = 0; i < size; i++)
+			for (int i = size - 1; i >= 0; i--)
 			{
 				str += i + " ";
+
+				if (i == 10)
+					str += " ";
 				if (i < 10)
 					str += " ";
 			}
