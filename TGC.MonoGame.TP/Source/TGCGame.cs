@@ -11,11 +11,6 @@ using System.Diagnostics;
 
 namespace TGC.MonoGame.TP
 {
-    /// <summary>
-    ///     Esta es la clase principal  del juego.
-    ///     Inicialmente puede ser renombrado o copiado para hacer más ejemplos chicos, en el caso de copiar para que se
-    ///     ejecute el nuevo ejemplo deben cambiar la clase que ejecuta Program <see cref="Program.Main()" /> linea 10.
-    /// </summary>
     public class TGCGame : Game
     {
         public const string ContentFolder3D = "Models/";
@@ -109,7 +104,7 @@ namespace TGC.MonoGame.TP
             var size = GraphicsDevice.Viewport.Bounds.Size;
             size.X /= 2;
             size.Y /= 2;
-            // Creo una camara libre con parametros de pitch, yaw que se puede mover con WASD, y rotar con mouse o flechas
+            // Creo una camara libre con parametros de pitch, yaw que se puede mover con WASD, y rotar con mouse
             Camera = new MyCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.Zero, size);
 
             LookBack = new MyCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.Zero, size);
@@ -213,7 +208,6 @@ namespace TGC.MonoGame.TP
             //LightCamera.NearPlane = shadowNear;
             //LightCamera.FarPlane = shadowFar;
 
-            //LightCamera.FrustumCenter = new Vector3(center.X, 0f, center.Z);
             LightCamera.Update(gameTime);
             
             Vector4 zone = Xwing.GetZone();
@@ -291,11 +285,8 @@ namespace TGC.MonoGame.TP
 
                     //Colisiones
                     Xwing.VerifyCollisions(Laser.EnemyLasers, Map);
-                    //Xwing.fired.RemoveAll(laser => laser.Age >= laser.MaxAge);
-
                     
                     TieFighter.UpdateEnemies(elapsedTime, Xwing);
-                    
                     
                     SoundManager.UpdateRandomDistantSounds(elapsedTime);
                     #endregion
