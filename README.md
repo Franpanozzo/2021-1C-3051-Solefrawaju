@@ -31,16 +31,17 @@ Afuera del mundo Windows, vas a necesitar la ayudar de [Wine](https://www.winehq
 Los recursos usados se almacenan utilizando [Git LFS](https://git-lfs.github.com), con lo cual antes de clonar el repositorio les conviene tenerlo instalado así es automático el pull o si ya lo tienen pueden hacer ```git lfs pull```.
 
 ## Integrantes
-TGC, Tgcito  |  Apellido, Nombre
------------- | -------------
-<img src="https://github.com/tgc-utn/tgc-utn.github.io/blob/master/images/robotgc.png" height="500"> | <img src="https://github.com/tgc-utn/tgc-utn.github.io/blob/master/images/trofeotp.png" height="500">
+Osuna, Leandro
+![IMG_20210714_175101](https://user-images.githubusercontent.com/62636307/125691216-d0d3d119-6291-45c9-998f-28b3d69e82a1.jpg)
 
 ## Capturas
-![screenshot1](https://github.com/tgc-utn/tgc-monogame-tp/blob/master/TGC.MonoGame.TP/Icon.bmp)
-![screenshot2](https://github.com/tgc-utn/tgc-monogame-tp/blob/master/TGC.MonoGame.TP/Icon.bmp)
-![screenshot3](https://github.com/tgc-utn/tgc-monogame-tp/blob/master/TGC.MonoGame.TP/Icon.bmp)
-![screenshot4](https://github.com/tgc-utn/tgc-monogame-tp/blob/master/TGC.MonoGame.TP/Icon.bmp)
-![screenshot5](https://github.com/tgc-utn/tgc-monogame-tp/blob/master/TGC.MonoGame.TP/Icon.bmp)
+![GP1](https://user-images.githubusercontent.com/62636307/125690477-f66238f3-943f-4582-b929-bcfef9e74a53.png)
+![GP2](https://user-images.githubusercontent.com/62636307/125690478-9204f98e-b997-45a5-86cd-094f1920745c.png)
+![Victory](https://user-images.githubusercontent.com/62636307/125690485-7f81b4dd-f0da-4f9b-bbe6-4ebc8c035e18.png)
+![Pause](https://user-images.githubusercontent.com/62636307/125690482-0a9ff4b2-34fc-47e1-a6a0-9d90debbdd86.png)
+![Defeat](https://user-images.githubusercontent.com/62636307/125690474-6bfc8db8-ecaa-49bf-956e-50982365e453.png)
 
 ## Game Play
-[![Watch the video](https://img.youtube.com/vi/pgEwUC0jvH4/0.jpg)](https://www.youtube.com/playlist?list=PLRM4L32DjvnazuMl8wZlbpEYL5Qh63ulG)
+
+[![Watch the video](https://user-images.githubusercontent.com/62636307/125690477-f66238f3-943f-4582-b929-bcfef9e74a53.png)](https://youtu.be/xSu0CfmpiPw)
+
