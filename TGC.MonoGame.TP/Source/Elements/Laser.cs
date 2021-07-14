@@ -28,7 +28,7 @@ namespace TGC.MonoGame.TP
 		public float MaxAge = 1f;
 		
 		public bool NotVisible = false;
-
+		public bool fromPlayer = false;
 		TGCGame Game;
 		public Laser(Vector3 pos, Matrix rotation, Matrix srt, Vector3 fd, Vector3 c)
 		{

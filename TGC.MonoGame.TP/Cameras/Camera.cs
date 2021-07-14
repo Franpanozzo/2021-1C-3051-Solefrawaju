@@ -9,7 +9,7 @@ public abstract class Camera
     public const float DefaultFieldOfViewDegrees = MathHelper.Pi / 3;
     //public const float DefaultNearPlaneDistance = 20.5f;
     //public const float DefaultFarPlaneDistance = 1300;
-    public const float DefaultNearPlaneDistance = 5f;
+    public const float DefaultNearPlaneDistance = 1f;
     public const float DefaultFarPlaneDistance = 1600;
 
     public Camera(float aspectRatio, float nearPlaneDistance = DefaultNearPlaneDistance,

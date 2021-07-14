@@ -44,7 +44,7 @@ namespace TGC.MonoGame.TP
             View = Matrix.CreateLookAt(Position, Position + FrontDirection, UpDirection);
         }
         float PrevPitch, PrevYaw;
-        Vector3 PrevPosition;
+        Vector3 PrevPosition; 
         bool PauseRotationDir;
         public void SaveCurrentState()
         {
@@ -52,7 +52,8 @@ namespace TGC.MonoGame.TP
             PrevYaw = Yaw;
             PrevPosition = Position;
 
-            PauseRotationDir = new Random().Next(0, 2) == 0;
+            //PauseRotationDir = new Random().Next(0, 2) == 0;
+            PauseRotationDir = true;
             PauseRotation = MathHelper.ToRadians(Yaw) + MathHelper.Pi;
             
         }
@@ -85,7 +86,7 @@ namespace TGC.MonoGame.TP
             UpdateCameraVectors();
             CalculateView();
 
-            lookBackCamera.Position = Position + FrontDirection * 80;
+            lookBackCamera.Position = Position + FrontDirection * 100;
             lookBackCamera.FrontDirection = -FrontDirection;
             lookBackCamera.CalculateView();
 
@@ -138,7 +139,7 @@ namespace TGC.MonoGame.TP
                 var dir = Vector3.Normalize(posDif);
 
                 var restoredPos = len < 2f;
-                var restoredYaw = Yaw > PrevYaw - 3f && Yaw < PrevYaw + 3f;
+                var restoredYaw = Yaw > PrevYaw - 6f && Yaw < PrevYaw + 6f;
                 var restoredPitch = Pitch > PrevPitch - 2f && Pitch < PrevPitch + 2f;
 
                 
@@ -175,9 +176,12 @@ namespace TGC.MonoGame.TP
             
             yawDelta = PrevYaw - Yaw;
             //Debug.WriteLine("PY " + PrevYaw + " AY " + Yaw + " D " + yawDelta);
-            
-            yawCorrectionDir = yawDelta >= 180;
 
+
+            if (PauseRotationDir)
+                yawCorrectionDir = yawDelta >= 180;
+            else
+                yawCorrectionDir = yawDelta <= 180;
             //Debug.WriteLine("Corrected? PY " + PrevYaw + " AY " + Yaw + " D " + yawDelta);
         }
         public void restorePreviousPitchYawPos()

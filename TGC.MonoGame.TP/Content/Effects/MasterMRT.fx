@@ -7,6 +7,10 @@
 #define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
+float Time;
+float ApplyShieldEffect;
+float3 ShieldColor;
+
 matrix World;
 matrix WorldViewProjection;
 matrix InverseTransposeWorld;
@@ -118,6 +122,7 @@ struct PSOMRT
 
 
 //float ApplyLightEffect;
+
 float3 OmniLightsPos[20];
 float3 OmniLightsColor[20];
 int OmniLightsCount;
@@ -169,6 +174,10 @@ float getShadow(VSODraw input, float3 normal)
     float2 shadowMapTextureCoordinates = 0.5 * lightSpacePosition.xy + float2(0.5, 0.5);
     shadowMapTextureCoordinates.y = 1.0f - shadowMapTextureCoordinates.y;
 	
+    if (shadowMapTextureCoordinates.x < 0.0 || shadowMapTextureCoordinates.x > 1.0
+        || shadowMapTextureCoordinates.y < 0.0 || shadowMapTextureCoordinates.y > 1.0)
+        return -1.0;
+    
     float inclinationBias = max(modulatedEpsilon * (1.0 - dot(normal, LightDirection)), maxEpsilon);
 	
     float shadowMapDepth = 1 - tex2D(shadowSampler, shadowMapTextureCoordinates).r + inclinationBias;
@@ -179,7 +188,6 @@ float getShadow(VSODraw input, float3 normal)
     
     return 0.25 * step(shadowMapDepth, lightSpacePosition.z);
 }
-
 PSOMRT TexturedDrawPS(VSODraw input)
 {
     PSOMRT output = (PSOMRT) 0;
@@ -191,7 +199,17 @@ PSOMRT TexturedDrawPS(VSODraw input)
     float3 normal = normalize(mul(fromNormalMap, input.WorldToTangentSpace));
     output.Normal = float4(normal, 1);
  
-    output.Color = texColor - getShadow(input, normal);
+    
+    //if(ApplyShieldEffect == 1.0)
+    //    if (input.TextureCoordinates.x < ran.GetRandomFloat(0,1))    
+    //        texColor.rgb = ShieldColor.rgb;
+            
+    
+    output.Color = texColor;
+    float shadowFilter = getShadow(input, normal);
+    
+    if (shadowFilter >= 0)
+        output.Color -= shadowFilter;
     
     output.DirToCam = float4(0.5 * (input.DirToCamera + 1), 1); //
     
@@ -219,7 +237,9 @@ PSOMRT TrenchPS(VSODraw input)
     else
         output.Color = float4(Color, 1);
     
-    output.Color -= getShadow(input, worldNormal);
+    float shadowFilter = getShadow(input, worldNormal);
+    if(shadowFilter >= 0)
+        output.Color -= shadowFilter;
     
     output.Bloom = float4(0,0,0, 1);
     
@@ -277,7 +297,7 @@ PSOMRT SkyboxPS(VSOsky input)
     
     output.Color = float4(texCUBE(SkyBoxSampler, normalize(input.TextureCoordinates)).rgb, 1);
     output.Bloom = float4(0, 0, 0, 0.0);
-    output.DirToCam = float4(1, 0, 1, 0);
+    output.DirToCam = float4(0, 0, 0, 0);
     output.Normal= float4(0, 0, 1, 0);
     
     return output;
@@ -456,10 +476,10 @@ DLightPSO DLightPS(DLightVSO input) : COLOR0
     
     for (int i = 0; i < kernel_size; i++)
     {
-        float2 scaledTextureCoordinatesH = input.TexCoord+ float2(0, (float) (i - kernel_r) / screenSize.x);
+        float2 scaledTextureCoordinatesH = input.TexCoord + float2((float) (i - kernel_r) / screenSize.x, 0);
         float2 scaledTextureCoordinatesV = input.TexCoord + float2(0, (float) (i - kernel_r) / screenSize.y);
         hColor += tex2D(bloomFilterSampler, scaledTextureCoordinatesH) * Kernel[i];
-        vColor += tex2D(bloomFilterSampler, scaledTextureCoordinatesH) * Kernel[i];
+        vColor += tex2D(bloomFilterSampler, scaledTextureCoordinatesV) * Kernel[i];
     }
     
     output.BlurH = hColor;
