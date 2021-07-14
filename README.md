@@ -31,8 +31,8 @@ Afuera del mundo Windows, vas a necesitar la ayudar de [Wine](https://www.winehq
 Los recursos usados se almacenan utilizando [Git LFS](https://git-lfs.github.com), con lo cual antes de clonar el repositorio les conviene tenerlo instalado así es automático el pull o si ya lo tienen pueden hacer ```git lfs pull```.
 
 ## Integrantes
-Osuna, Leandro
 <img src = "https://user-images.githubusercontent.com/62636307/125691216-d0d3d119-6291-45c9-998f-28b3d69e82a1.jpg" width = 500>
+Osuna, Leandro
 
 ## Capturas
 ![GP1](https://user-images.githubusercontent.com/62636307/125690477-f66238f3-943f-4582-b929-bcfef9e74a53.png)
