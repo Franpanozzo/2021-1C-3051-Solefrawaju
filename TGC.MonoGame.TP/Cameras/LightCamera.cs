@@ -17,8 +17,7 @@ namespace TGC.MonoGame.TP
             FrontDirection = new Vector3(-0.86602545f, -0.5f, 0f);
             RightDirection = Vector3.Normalize(Vector3.Cross(FrontDirection, Vector3.Up));
             UpDirection = Vector3.Normalize(Vector3.Cross(RightDirection, FrontDirection));
-            System.Diagnostics.Debug.WriteLine(FrontDirection);
-
+            
             NearPlane = 250f;
             FarPlane = 900f;
             CalculateProjection();

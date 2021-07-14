@@ -116,7 +116,6 @@ namespace TGC.MonoGame.TP
 
             SelectedCamera = Camera;
 
-            //int mapSize = 9; //9x9
             //Algoritmo de generacion de mapa recursivo (ver debug output)
             Map = Trench.GenerateMap(MapSize);
             System.Diagnostics.Debug.WriteLine(Trench.ShowMapInConsole(Map, MapSize));
@@ -151,25 +150,23 @@ namespace TGC.MonoGame.TP
             Camera.MapLimit = MapLimit;
             Camera.MapSize = MapSize;
             Camera.BlockSize = blockSize;
-            Camera.Position = new Vector3(MapLimit/2 - blockSize/2, 150f, blockSize /2);
+            Camera.Position = new Vector3(MapLimit / 2 - blockSize / 2, 150f, blockSize / 2);
+            
             Xwing.MapLimit = MapLimit;
             Xwing.MapSize = MapSize;
             Xwing.Update(0f, Camera);
 
             LightCamera = new LightCamera(Camera.AspectRatio, Xwing.Position - Vector3.Left * 300 + Vector3.Up * (300 * MathF.Tan(MathHelper.ToRadians(30))));
-            //Debug.WriteLine(LightCamera.Projection.ToString());
-
+         
             LightCamera.BuildProjection(LightCamera.AspectRatio, 50f, 3000f, LightCamera.DefaultFieldOfViewDegrees);
-            //LightCamera.BuildProjection(1f, 5f, 3000f, LightCamera.DefaultFieldOfViewDegrees);
-
-            //Debug.WriteLine(LightCamera.Projection.ToString());
-
+            
             Laser.MapLimit = MapLimit;
             Laser.MapSize = MapSize;
             Laser.BlockSize = blockSize;
 
            
             base.LoadContent();
+
         }
 
         public BoundingFrustum BoundingFrustum = new BoundingFrustum(Matrix.Identity);

@@ -529,7 +529,7 @@ namespace TGC.MonoGame.TP
             size = MathHelper.Clamp(MathHelper.Lerp(10, sectorSize, 1 - vz),26,512);
             scale = size / sectorSize ;
             //Debug.WriteLine(vx + "," + vy +" "+x+","+y);
-            Debug.WriteLine(wvp.Z +","+size);
+            //Debug.WriteLine(wvp.Z +","+size);
             return new Vector2(x - size/2, y - size / 2);
             //Debug.WriteLine("w " + world + " cst " + Game.Vector3ToStr(ics.Translation));
             //Debug.WriteLine(Game.Vector2ToStr(new Vector2(ics.M11, ics.M12)) + "  "+ Game.Vector2ToStr(new Vector2(ics.M11, ics.M21)));

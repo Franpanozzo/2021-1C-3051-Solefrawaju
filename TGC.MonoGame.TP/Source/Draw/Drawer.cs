@@ -276,30 +276,31 @@ namespace TGC.MonoGame.TP
 
             DrawSceneMRT(DrawType.Regular);
             
+            
+
+            /* Calculate and integrate lights, also blur the filtered bloom*/
+            GraphicsDevice.SetRenderTargets(SceneTarget, BlurHRenderTarget, BlurVRenderTarget);
+
+            MasterMRT.CurrentTechnique = MRTCalculateIntegrateLightBlur;
+            MRTcolorMap.SetValue(ColorTarget);
+            MRTdirToCamMap.SetValue(DirToCamTarget);
+            MRTnormalMap.SetValue(NormalTarget);
+            MRTbloomFilter.SetValue(BloomFilterTarget);
+            MRTlightColor.SetValue(new Vector3(1f, 1f, 1f));
+            MRTambientLightColor.SetValue(new Vector3(0.98f, 0.9f, 1f));
+            MRTambientLightIntensity.SetValue(0.35f);
+            MRTscreenSize.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+
+                
+            FullScreenQuad.Draw(MasterMRT);
+                
+            /* integrate */
+            GraphicsDevice.DepthStencilState = DepthStencilState.None;
+            GraphicsDevice.SetRenderTarget(null);
+            GraphicsDevice.Clear(Color.Black);
+
             if (ShowTarget == 0)
             {
-
-                /* Calculate and integrate lights, also blur the filtered bloom*/
-                GraphicsDevice.SetRenderTargets(SceneTarget, BlurHRenderTarget, BlurVRenderTarget);
-
-                MasterMRT.CurrentTechnique = MRTCalculateIntegrateLightBlur;
-                MRTcolorMap.SetValue(ColorTarget);
-                MRTdirToCamMap.SetValue(DirToCamTarget);
-                MRTnormalMap.SetValue(NormalTarget);
-                MRTbloomFilter.SetValue(BloomFilterTarget);
-                MRTlightColor.SetValue(new Vector3(1f, 1f, 1f));
-                MRTambientLightColor.SetValue(new Vector3(0.98f, 0.9f, 1f));
-                MRTambientLightIntensity.SetValue(0.35f);
-                MRTscreenSize.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-
-                
-                FullScreenQuad.Draw(MasterMRT);
-                
-                /* integrate */
-                GraphicsDevice.DepthStencilState = DepthStencilState.None;
-                GraphicsDevice.SetRenderTarget(null);
-                GraphicsDevice.Clear(Color.Black);
-
                 EffectBloom.CurrentTechnique = EffectBloom.Techniques["Integrate"];
                 EPbloomTexture.SetValue(SceneTarget);
                 EPbloomBlurHTexture.SetValue(BlurHRenderTarget);
@@ -311,14 +312,12 @@ namespace TGC.MonoGame.TP
                 {
                     SpriteBatch.Begin();
                     SpriteBatch.Draw(ShadowMapRenderTarget,
-                               new Vector2(0, 250), null, Color.White, 0f, Vector2.Zero, 0.10f, SpriteEffects.None, 0);
+                                new Vector2(0, 250), null, Color.White, 0f, Vector2.Zero, 0.10f, SpriteEffects.None, 0);
                     SpriteBatch.End();
                 }
             }
             else if (ShowTarget >= 1)
             {
-
-                GraphicsDevice.SetRenderTarget(null);
 
                 SpriteBatch.Begin();
 
@@ -327,7 +326,8 @@ namespace TGC.MonoGame.TP
                 else if (ShowTarget == 2)
                     SpriteBatch.Draw(NormalTarget, Vector2.Zero, Color.White);
                 else if (ShowTarget == 3)
-                    SpriteBatch.Draw(LightTarget, Vector2.Zero, Color.White);
+                    SpriteBatch.Draw(ShadowMapRenderTarget,
+                           Vector2.Zero, null, Color.White, 0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
                 else if (ShowTarget == 4)
                     SpriteBatch.Draw(BloomFilterTarget, Vector2.Zero, Color.White);
                 else if (ShowTarget == 5)
@@ -336,15 +336,9 @@ namespace TGC.MonoGame.TP
                     SpriteBatch.Draw(BlurHRenderTarget, Vector2.Zero, Color.White);
                 else if (ShowTarget == 7)
                     SpriteBatch.Draw(BlurVRenderTarget, Vector2.Zero, Color.White);
-                else if (ShowTarget == 8)
-                    SpriteBatch.Draw(ShadowMapRenderTarget,
-                           Vector2.Zero, null, Color.White, 0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
-
-
+                
                 SpriteBatch.End();
             }
-            //DrawScene(DrawType.Regular);
-
         }
         
         #region MRTelements
@@ -361,15 +355,7 @@ namespace TGC.MonoGame.TP
             foreach (var mesh in t.SelectedModel.Meshes)
             {
                 world = mesh.ParentBone.Transform * t.SRT;
-                //if(t.SelectedIndex == 0)
-                    MRTcolor.SetValue(new Vector3(0.5f, 0.5f, 0.5f));
-                //if (t.SelectedIndex == 1)
-                //    MRTcolor.SetValue(new Vector3(0.5f, 0f, 0f));
-                //if (t.SelectedIndex == 2)
-                //    MRTcolor.SetValue(new Vector3(0f, 0.5f, 0f));
-                //if (t.SelectedIndex == 3)
-                //    MRTcolor.SetValue(new Vector3(0f, 0f, 0.5f));
-
+                MRTcolor.SetValue(new Vector3(0.5f, 0.5f, 0.5f));
                 MRTworld.SetValue(world);
                 MRTworldViewProjection.SetValue(world * Game.SelectedCamera.View * Game.SelectedCamera.Projection);
                 MRTinverseTransposeWorld.SetValue(Matrix.Transpose(Matrix.Invert(world)));
@@ -419,7 +405,7 @@ namespace TGC.MonoGame.TP
             
             int meshCount = 0;
             if (dt == DrawType.Regular)
-                MasterMRT.CurrentTechnique = MRTbasicColor; // remove for light post proc.
+                MasterMRT.CurrentTechnique = MRTbasicColor;
             
             //MRTapplyLightEffect.SetValue(0f);
 
